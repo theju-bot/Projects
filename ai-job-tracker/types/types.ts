@@ -34,5 +34,5 @@ export interface IJob extends Document{
   salaryMin?: number
   salaryMax?: number
   fitScore?: number
-  appliedAt?: string
+  appliedAt?: Date
 }
