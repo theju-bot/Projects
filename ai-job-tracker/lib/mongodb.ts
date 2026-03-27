@@ -1,4 +1,5 @@
 import mongoose, { Mongoose } from 'mongoose'
+import { MongoClient } from 'mongodb'
 
 const MONGODB_URI = process.env.MONGODB_URI
 
@@ -11,6 +12,7 @@ interface MongooseCache {
 
 declare global {
   var mongoose: MongooseCache
+  var _mongoClient: MongoClient | undefined
 }
 
 let cached: MongooseCache = global.mongoose ?? { conn: null, promise: null }
@@ -34,3 +36,9 @@ export async function connectDB() {
 
   return cached.conn
 }
+
+if (!global._mongoClient) {
+  global._mongoClient = new MongoClient(MONGODB_URI as string)
+}
+
+export const mongoClient: MongoClient = global._mongoClient

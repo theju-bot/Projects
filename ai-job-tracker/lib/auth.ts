@@ -1,12 +1,9 @@
 import { betterAuth } from 'better-auth'
 import { mongodbAdapter } from 'better-auth/adapters/mongodb'
-import { MongoClient } from 'mongodb'
-
-const client = new MongoClient(process.env.MONGODB_URI!)
-await client.connect()
+import { mongoClient } from './mongodb'
 
 export const auth = betterAuth({
-  database:mongodbAdapter(client.db()),
+  database: mongodbAdapter(mongoClient.db()),
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -15,4 +12,23 @@ export const auth = betterAuth({
   },
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
+  user: {
+    additionalFields: {
+      aiProvider: {
+        type: 'string',
+        defaultValue: '',
+        input: true,
+      },
+      apiKey: {
+        type: 'string',
+        defaultValue: '',
+        input: true,
+        select: false,
+      },
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 3,
+    updateAge: 60 * 60 * 24,
+  },
 })
