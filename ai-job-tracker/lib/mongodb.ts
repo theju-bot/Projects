@@ -1,3 +1,18 @@
+// import { MongoClient } from 'mongodb'
+
+// const MONGODB_URI = process.env.MONGODB_URI
+// if (!MONGODB_URI) throw new Error('MONGODB_URI not defined')
+
+// declare global {
+//   var _mongoClient: MongoClient | undefined
+// }
+
+// if (!global._mongoClient) {
+//   global._mongoClient = new MongoClient(MONGODB_URI)
+// }
+
+// export const mongoClient: MongoClient = global._mongoClient
+
 import mongoose, { Mongoose } from 'mongoose'
 import { MongoClient } from 'mongodb'
 
