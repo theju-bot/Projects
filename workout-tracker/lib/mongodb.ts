@@ -17,11 +17,16 @@ export async function connectDB() {
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI as string, {
       bufferCommands: false,
+      family: 4,
+      serverSelectionTimeoutMS: 8000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
     })
   }
 
   try {
     cached.conn = await cached.promise
+    console.log('MongoDB connected successfully (IPv4)')
   } catch (e) {
     cached.promise = null
     throw e

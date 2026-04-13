@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { loginAction } from './actions'
+import { loginAction } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-export default function RegisterPage() {
+export default function SignInPage() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +27,7 @@ export default function RegisterPage() {
         setError(result.error)
         return
       }
-      router.push('/dashboard/workout-plans')
+      router.push('/dashboard')
     })
   }
 

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { registerAction } from './actions'
+import { registerAction } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,7 +27,7 @@ export default function RegisterPage() {
         setError(result.error)
         return
       }
-      router.push('/dashboard/workout-plans')
+      router.push('/dashboard')
     })
   }
 
