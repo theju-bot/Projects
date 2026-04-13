@@ -1,0 +1,33 @@
+import type { Mongoose } from 'mongoose'
+import { Document, Types } from 'mongoose'
+
+export interface MongooseCache {
+  conn: Mongoose | null
+  promise: Promise<Mongoose> | null
+}
+
+export interface UserWT extends Document {
+  name: string
+  email: string
+  password: string
+}
+
+export interface ExerciseWT extends Document {
+  name: string
+  description: string
+  category: string
+}
+
+export interface WorkoutWT extends Document {
+  exercise: Types.ObjectId
+  sets: number
+  reps: number
+  weight: number
+}
+
+export interface WorkoutPlanWT extends Document {
+  user: Types.ObjectId
+  exercises: Types.ObjectId[]
+  date: Date
+  comments: string
+}
