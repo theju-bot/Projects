@@ -23,11 +23,15 @@ export interface WorkoutWT extends Document {
   sets: number
   reps: number
   weight: number
+  notes: string
 }
 
 export interface WorkoutPlanWT extends Document {
   user: Types.ObjectId
-  exercises: Types.ObjectId[]
+  name: string
   date: Date
+  exercises: WorkoutWT[]
   comments: string
 }
+
+export type workoutPlanIdProps = { params: Promise<{ id: string }> }
