@@ -4,6 +4,7 @@ import { User } from '@/lib/models/User'
 import { connectDB } from './mongodb'
 import { AuthPayload } from '@/types/types'
 import { NextRequest } from 'next/server'
+import { AppError } from './error/error'
 
 const JWT_SECRET = process.env.JWT_SECRET as string
 if (!JWT_SECRET) {
@@ -14,7 +15,7 @@ const secret = new TextEncoder().encode(JWT_SECRET)
 async function createAccessToken(userId: string): Promise<string> {
   const payload: AuthPayload = { userId }
 
-  const expirationTime = process.env.NODE_ENV !== 'development' ? '15m' : '1h'
+  const expirationTime = process.env.NODE_ENV !== 'development' ? '15m' : '1d'
 
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
@@ -33,13 +34,13 @@ export async function registerUser(
 
   const existingUser = await User.findOne({ email })
   if (existingUser) {
-    throw new Error('User already exists')
+    throw new AppError('User already exists', 409)
   }
 
   const hashedPwd = await bcrypt.hash(password, 10)
   const newUser = await User.create({ name, email, password: hashedPwd })
 
-  return await createAccessToken(newUser._id)
+  return await createAccessToken(newUser._id.toString())
 }
 
 export async function loginUser(
@@ -50,15 +51,15 @@ export async function loginUser(
 
   const user = await User.findOne({ email })
   if (!user) {
-    throw new Error('Invalid email or password')
+    throw new AppError('Invalid email or password', 401)
   }
 
   const isMatch = await bcrypt.compare(password, user.password)
   if (!isMatch) {
-    throw new Error('Invalid email or password')
+    throw new AppError('Invalid email or password', 401)
   }
 
-  return await createAccessToken(user._id)
+  return await createAccessToken(user._id.toString())
 }
 
 export async function verifyJWT(token: string): Promise<AuthPayload | null> {
@@ -73,7 +74,17 @@ export async function verifyJWT(token: string): Promise<AuthPayload | null> {
   }
 }
 
-export function getHeaderUser(req: NextRequest): AuthPayload | null {
+export function getHeaderUser(req: NextRequest): AuthPayload {
   const userId = req.headers.get('x-user-id')
-  return userId ? { userId } : null
+  if (!userId) {
+    throw new AppError('Unauthorized', 401)
+  }
+  return { userId }
+}
+
+export function checkOwnership(resource: any, session: AuthPayload) {
+  const ownerId = resource.user?._id?.toString() ?? resource.user?.toString()
+  if (ownerId !== session.userId) {
+    throw new AppError('Forbidden', 403)
+  }
 }

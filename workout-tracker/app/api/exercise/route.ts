@@ -2,39 +2,38 @@ import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
 import { Exercise } from '@/lib/models/Exercise'
 import { exerciseSchema } from '@/lib/schema/exerciseSchema'
-import { z } from 'zod'
 import { getHeaderUser } from '@/lib/auth'
+import { withErrorHandler } from '@/lib/error/withErrorHandler'
+import { AppError } from '@/lib/error/error'
+import { z } from 'zod'
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = getHeaderUser(req)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    
-    const body = await req.json()
-    const validatedData = exerciseSchema.parse(body)
-
-    await connectDB()
-
-    const exercise = await Exercise.create({
-      ...validatedData,
-    })
-
-    return NextResponse.json({ message: 'Exercise created' }, { status: 201 })
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: err.issues[0]?.message || 'Validation Error',
-      })
-    }
-
-    console.log('Exercise creation error:', err)
-    return NextResponse.json(
-      { success: false, error: 'Exercise creation Failed' },
-      { status: 500 },
-    )
-  }
+async function getExercise(req: NextRequest) {
+  getHeaderUser(req)
+  await connectDB()
+  const exercises = await Exercise.find()
+  return NextResponse.json(exercises)
 }
+
+async function postExercise(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams
+  const pwd = searchParams.get('password')
+  if (pwd !== process.env.EXERCISE_PASSWORD)
+    throw new AppError('Unauthorized', 401)
+
+  getHeaderUser(req)
+
+  const body = await req.json()
+  const dataArray = Array.isArray(body) ? body : [body]
+  const validatedData = z.array(exerciseSchema).parse(dataArray)
+
+  await connectDB()
+  const exercise = await Exercise.insertMany(validatedData)
+
+  return NextResponse.json(
+    { message: 'Exercise created', count: exercise.length, exercise },
+    { status: 201 },
+  )
+}
+
+export const GET = withErrorHandler(getExercise)
+export const POST = withErrorHandler(postExercise)

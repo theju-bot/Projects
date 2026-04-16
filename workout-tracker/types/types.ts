@@ -34,7 +34,7 @@ export interface WorkoutPlanWT extends Document {
   comments: string
 }
 
-export type workoutPlanIdProps = { params: Promise<{ id: string }> }
+export type idProps = { params: Promise<{ id: string }> }
 
 export interface AuthPayload {
   userId: string

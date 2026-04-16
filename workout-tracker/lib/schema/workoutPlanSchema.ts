@@ -1,4 +1,13 @@
 import { z } from 'zod'
+import { Types } from 'mongoose'
+
+const objectIdSchema = z
+  .string()
+  .min(1, 'Exercise ID is required')
+  .refine((val) => Types.ObjectId.isValid(val), {
+    message: 'Invalid exercise ID format',
+  })
+  .transform((val) => new Types.ObjectId(val))
 
 export const workoutPlanSchema = z.object({
   name: z
@@ -9,11 +18,11 @@ export const workoutPlanSchema = z.object({
   exercises: z
     .array(
       z.object({
-        exercise: z.string().min(1, 'Exercise is required'),
+        exercise: objectIdSchema,
         sets: z.number().min(1, 'Sets is required'),
         reps: z.number().min(1, 'Reps is required'),
         weight: z.number().min(0, 'Weight must be a positive number'),
-        notes: z.string().trim().min(1).optional(),
+        notes: z.string().trim().optional(),
       }),
     )
     .min(1, 'At least one exercise is required'),

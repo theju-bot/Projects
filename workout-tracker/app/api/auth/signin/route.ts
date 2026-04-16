@@ -1,56 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { loginUserSchema } from '@/lib/schema/userSchema'
 import { loginUser } from '@/lib/auth'
-import { z } from 'zod'
+import { withErrorHandler } from '@/lib/error/withErrorHandler'
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const validatedData = loginUserSchema.parse(body)
+export async function postSignIn(request: NextRequest) {
+  const body = await request.json()
+  const validatedData = loginUserSchema.parse(body)
 
-    const token = await loginUser(validatedData.email, validatedData.password)
+  const token = await loginUser(validatedData.email, validatedData.password)
 
-    const response = NextResponse.json(
-      {
-        success: true,
-        message: 'Login successful',
-      },
-      { status: 200 },
-    )
+  const response = NextResponse.json({
+    success: true,
+    message: 'Login successful',
+  })
 
-    response.cookies.set('jwt', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
-      maxAge: process.env.NODE_ENV !== 'development' ? 60 * 15 : 60 * 60 * 24,
-      path: '/',
-    })
+  response.cookies.set('jwt', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== 'development',
+    sameSite: 'strict',
+    maxAge: process.env.NODE_ENV !== 'development' ? 60 * 15 : 60 * 60 * 24,
+    path: '/',
+  })
 
-    return response
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: err.issues[0]?.message || 'Validation Error',
-        },
-        { status: 400 },
-      )
-    }
-
-    if (err instanceof Error) {
-      if (err.message === 'Invalid email or password') {
-        return NextResponse.json(
-          { success: false, error: err.message },
-          { status: 401 },
-        )
-      }
-    }
-
-    console.log('Login error:', err)
-    return NextResponse.json(
-      { success: false, error: 'Login Failed' },
-      { status: 500 },
-    )
-  }
+  return response
 }
+
+export const POST = withErrorHandler(postSignIn)

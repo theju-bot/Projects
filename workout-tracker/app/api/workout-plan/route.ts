@@ -3,13 +3,11 @@ import { connectDB } from '@/lib/mongodb'
 import { WorkoutPlan } from '@/lib/models/WorkoutPlan'
 import { workoutPlanSchema } from '@/lib/schema/workoutPlanSchema'
 import { getHeaderUser } from '@/lib/auth'
+import { Types } from 'mongoose'
+import { withErrorHandler } from '@/lib/error/withErrorHandler'
 
-export async function GET(req: NextRequest) {
+async function getWorkoutPlans(req: NextRequest) {
   const session = getHeaderUser(req)
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   await connectDB()
   const plans = await WorkoutPlan.find({ user: session.userId }).populate(
     'exercises.exercise',
@@ -18,30 +16,20 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(plans)
 }
 
-export async function POST(req: NextRequest) {
+async function postWorkoutPlan(req: NextRequest) {
   const session = getHeaderUser(req)
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   await connectDB()
   const body = await req.json()
 
-  const validation = workoutPlanSchema.safeParse(body)
-  if (!validation.success) {
-    return NextResponse.json(
-      {
-        error: validation.error.issues,
-      },
-      { status: 400 },
-    )
-  }
-
+  const validation = workoutPlanSchema.parse(body)
   const plan = await WorkoutPlan.create({
-    ...validation.data,
-    user: session.userId,
-    date: validation.data.date ?? new Date(),
+    ...validation,
+    user: new Types.ObjectId(session.userId),
+    date: validation.date ?? new Date(),
   })
 
   return NextResponse.json(plan, { status: 201 })
 }
+
+export const GET = withErrorHandler(getWorkoutPlans)
+export const POST = withErrorHandler(postWorkoutPlan)
