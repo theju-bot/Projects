@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
-import { WorkoutPlan } from '@/models/WorkoutPlan'
-import { getSession } from '@/lib/getSession'
+import { WorkoutPlan } from '@/lib/models/WorkoutPlan'
+import { getHeaderUser } from '@/lib/auth'
 import type { workoutPlanIdProps } from '@/types/types'
-import { workoutPlanSchema } from '@/lib/validations/workoutPlanSchema'
+import { workoutPlanSchema } from '@/lib/schema/workoutPlanSchema'
 
 export async function GET(req: NextRequest, { params }: workoutPlanIdProps) {
   const { id } = await params
-  const session = await getSession()
+  const session = getHeaderUser(req)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, { params }: workoutPlanIdProps) {
 
 export async function PUT(req: NextRequest, { params }: workoutPlanIdProps) {
   const { id } = await params
-  const session = await getSession()
+  const session = getHeaderUser(req)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -71,7 +71,7 @@ export async function PUT(req: NextRequest, { params }: workoutPlanIdProps) {
 
 export async function DELETE(req: NextRequest, { params }: workoutPlanIdProps) {
   const { id } = await params
-  const session = await getSession()
+  const session = getHeaderUser(req)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

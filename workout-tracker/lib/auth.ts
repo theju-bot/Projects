@@ -1,18 +1,27 @@
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-import { User } from '@/models/User'
+import { SignJWT, jwtVerify } from 'jose'
+import { User } from '@/lib/models/User'
 import { connectDB } from './mongodb'
+import { AuthPayload } from '@/types/types'
+import { NextRequest } from 'next/server'
 
-function accessToken(userId: string, userName: string): string {
-  const JWT_SECRET = process.env.JWT_SECRET as string
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is missing')
-  }
+const JWT_SECRET = process.env.JWT_SECRET as string
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is missing')
+}
+const secret = new TextEncoder().encode(JWT_SECRET)
 
-  return jwt.sign({ userId, userName }, JWT_SECRET, {
-    expiresIn: '15m',
-    issuer: 'theju',
-  })
+async function createAccessToken(userId: string): Promise<string> {
+  const payload: AuthPayload = { userId }
+
+  const expirationTime = process.env.NODE_ENV !== 'development' ? '15m' : '1h'
+
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(expirationTime)
+    .setIssuer('theju')
+    .sign(secret)
 }
 
 export async function registerUser(
@@ -30,7 +39,7 @@ export async function registerUser(
   const hashedPwd = await bcrypt.hash(password, 10)
   const newUser = await User.create({ name, email, password: hashedPwd })
 
-  return accessToken(newUser._id, newUser.name)
+  return await createAccessToken(newUser._id)
 }
 
 export async function loginUser(
@@ -49,5 +58,22 @@ export async function loginUser(
     throw new Error('Invalid email or password')
   }
 
-  return accessToken(user._id, user.name)
+  return await createAccessToken(user._id)
+}
+
+export async function verifyJWT(token: string): Promise<AuthPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ['HS256'],
+    })
+    return payload as AuthPayload
+  } catch (err) {
+    console.error('Token verification failed:', err)
+    return null
+  }
+}
+
+export function getHeaderUser(req: NextRequest): AuthPayload | null {
+  const userId = req.headers.get('x-user-id')
+  return userId ? { userId } : null
 }
