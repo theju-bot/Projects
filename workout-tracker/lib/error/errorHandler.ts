@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server'
 import { ZodError } from 'zod'
-import { AppError } from './error'
+import { AppError } from './AppError'
+
+function isMongooseError(e: unknown): e is {
+  name: string
+  code?: number
+  path?: string
+  errors?: Record<string, { message: string }>
+} {
+  return e instanceof Error
+}
 
 export function errorHandler(err: unknown): NextResponse {
   console.error('API Error occurred : ', err)
@@ -9,22 +18,28 @@ export function errorHandler(err: unknown): NextResponse {
     return NextResponse.json(
       {
         success: false,
-        error: 'Validation failed',
-        issues: err.issues,
+        message: err.issues[0]?.message ?? 'Validation Failed',
       },
       { status: 400 },
     )
   }
 
+  if (err instanceof AppError) {
+    return NextResponse.json(
+      { success: false, message: err.message },
+      { status: err.status },
+    )
+  }
+
   if (err instanceof Error) {
-    const e = err as any
+    const e = isMongooseError(err) ? err : (err as any)
 
     if (e.name === 'ValidationError') {
+      const firstError = Object.values(e.errors)[0] as any
       return NextResponse.json(
         {
           success: false,
-          error: 'Database validation failed',
-          details: e.errors,
+          message: firstError?.message ?? 'Validation failed',
         },
         { status: 400 },
       )
@@ -34,7 +49,7 @@ export function errorHandler(err: unknown): NextResponse {
       return NextResponse.json(
         {
           success: false,
-          error: `Invalid ${e.path}`,
+          message: `Invalid ${e.path}`,
         },
         { status: 400 },
       )
@@ -44,27 +59,22 @@ export function errorHandler(err: unknown): NextResponse {
       return NextResponse.json(
         {
           success: false,
-          error: 'Duplicate entity',
+          message: 'Duplicate entity',
         },
         { status: 409 },
       )
     }
   }
 
-  if (err instanceof AppError) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: err.status },
-    )
-  }
-
   return NextResponse.json(
     {
       success: false,
-      error: 'Internal Server Error',
-      ...(process.env.NODE_ENV === 'development' && {
-        message: err instanceof Error ? err.message : String(err),
-      }),
+      message:
+        process.env.NODE_ENV === 'development'
+          ? err instanceof Error
+            ? err.message
+            : String(err)
+          : 'Internal Server Error',
     },
     { status: 500 },
   )

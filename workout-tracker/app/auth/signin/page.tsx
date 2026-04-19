@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { loginAction } from '@/actions/auth'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,85 +11,122 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function SignInPage() {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const callbackurl = searchParams.get('callbackUrl') ?? '/dashboard'
 
-  function handleSubmit(formData: FormData) {
-    setError(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError('')
+
+    const formData = new FormData(e.currentTarget)
+
     startTransition(async () => {
-      const result = await loginAction(formData)
-      if (result?.error) {
-        setError(result.error)
-        return
+      try {
+        const res = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.get('email'),
+            password: formData.get('password'),
+          }),
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          setError(data.message ?? 'Signin Failed')
+          return
+        }
+
+        router.push(callbackurl)
+      } catch (err) {
+        setError('Network error. Please try again.')
       }
-      router.push('/dashboard')
     })
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-background'>
-      <Card className='w-full max-w-md'>
-        <CardHeader>
-          <CardTitle className='text-4xl'>Sign in</CardTitle>
-          <CardDescription>
-            Enter your email and password to continue
-          </CardDescription>
+    <main className='min-h-screen flex items-center justify-center bg-background px-4'>
+      <Card className='w-full max-w-sm'>
+        <CardHeader className='space-y-1'>
+          <CardTitle className='text-3xl'>Sign In</CardTitle>
+          <CardDescription>Enter your credentials to continue</CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <form action={handleSubmit} className='space-y-4'>
-            <div className='space-y-1'>
+        <form onSubmit={handleSubmit}>
+          <CardContent className='space-y-4 pb-4'>
+            <div className='space-y-2'>
               <Label htmlFor='email'>Email</Label>
               <Input
-                name='email'
                 id='email'
+                name='email'
                 type='email'
+                placeholder='you@example.com'
+                autoComplete='email'
                 required
                 disabled={isPending}
-                placeholder='email@example.com'
               />
             </div>
 
-            <div className='space-y-1'>
+            <div className='space-y-2'>
               <Label htmlFor='password'>Password</Label>
-              <Input
-                name='password'
-                id='password'
-                type='password'
-                required
-                disabled={isPending}
-                placeholder='••••••••'
-              />
+              <div className='relative'>
+                <Input
+                  id='password'
+                  name='password'
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder='••••••••'
+                  autoComplete='current-password'
+                  required
+                  className='pr-10'
+                  disabled={isPending}
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword((v) => !v)}
+                  className='absolute inset-y-0 right-3  fles items-center text-muted-foreground hover:text-foreground cursor-pointer disabled:opacity-50'
+                  aria-label={showPassword ? 'Hide Password' : 'Show Password'}
+                >
+                  {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
             </div>
 
             {error && (
-              <p className='text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md'>
-                {error}
-              </p>
+              <Alert variant={'destructive'}>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
+          </CardContent>
 
-            <Button type='submit' disabled={isPending} className='w-full'>
-              {isPending ? 'Signing in..' : 'Sign in'}
+          <CardFooter className='flex flex-col gap-3'>
+            <Button type='submit' className='w-full' disabled={isPending}>
+              {isPending && <Loader2 size={16} />} Sign In
             </Button>
-          </form>
-
-          <p className='text-sm text-muted-foreground text-center mt-6'>
-            Don&apos;t have an account?{' '}
-            <a
-              href='/auth/register'
-              className='text-foreground font-medium hover:underline'
-            >
-              Register
-            </a>
-          </p>
-        </CardContent>
+            <p className='text-sm text-muted-foreground'>
+              No account?&nbsp;{' '}
+              <Link
+                href='/auth/register'
+                className='text-foreground underline underline-offset-4 hover:opacity-80'
+              >
+                Register
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
       </Card>
-    </div>
+    </main>
   )
 }

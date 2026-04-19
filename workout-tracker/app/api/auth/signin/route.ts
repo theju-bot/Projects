@@ -3,7 +3,7 @@ import { loginUserSchema } from '@/lib/schema/userSchema'
 import { loginUser } from '@/lib/auth'
 import { withErrorHandler } from '@/lib/error/withErrorHandler'
 
-export async function postSignIn(request: NextRequest) {
+async function postSignIn(request: NextRequest) {
   const body = await request.json()
   const validatedData = loginUserSchema.parse(body)
 

@@ -1,5 +1,8 @@
 import mongoose from 'mongoose'
 import type { MongooseCache } from '@/types/types'
+import '@/lib/models/Exercise'
+import '@/lib/models/WorkoutPlan'
+import '@/lib/models/User'
 
 const MONGODB_URI = process.env.MONGODB_URI
 if (!MONGODB_URI) throw new Error('MONGODB_URI is not  defined')

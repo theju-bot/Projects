@@ -5,7 +5,7 @@ import { getHeaderUser, checkOwnership } from '@/lib/auth'
 import type { idProps as workoutPlanIdProps } from '@/types/types'
 import { workoutPlanSchema } from '@/lib/schema/workoutPlanSchema'
 import { withErrorHandler } from '@/lib/error/withErrorHandler'
-import { AppError } from '@/lib/error/error'
+import { AppError } from '@/lib/error/AppError'
 
 async function getWorkoutPlan(
   req: NextRequest,
@@ -46,7 +46,7 @@ async function putWorkoutPlan(
   return NextResponse.json(updatedWorkoutPlan)
 }
 
-export async function deleteWorkoutPlan(
+async function deleteWorkoutPlan(
   req: NextRequest,
   { params }: workoutPlanIdProps,
 ) {

@@ -4,7 +4,7 @@ import { Exercise } from '@/lib/models/Exercise'
 import { exerciseSchema } from '@/lib/schema/exerciseSchema'
 import { getHeaderUser } from '@/lib/auth'
 import { withErrorHandler } from '@/lib/error/withErrorHandler'
-import { AppError } from '@/lib/error/error'
+import { AppError } from '@/lib/error/AppError'
 import { z } from 'zod'
 
 async function getExercise(req: NextRequest) {

@@ -4,7 +4,7 @@ import { User } from '@/lib/models/User'
 import { connectDB } from './mongodb'
 import { AuthPayload } from '@/types/types'
 import { NextRequest } from 'next/server'
-import { AppError } from './error/error'
+import { AppError } from './error/AppError'
 
 const JWT_SECRET = process.env.JWT_SECRET as string
 if (!JWT_SECRET) {

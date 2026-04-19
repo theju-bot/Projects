@@ -5,7 +5,7 @@ import { Exercise } from '@/lib/models/Exercise'
 import { getHeaderUser } from '@/lib/auth'
 import { exerciseSchema } from '@/lib/schema/exerciseSchema'
 import { withErrorHandler } from '@/lib/error/withErrorHandler'
-import { AppError } from '@/lib/error/error'
+import { AppError } from '@/lib/error/AppError'
 
 async function putExercise(req: NextRequest, { params }: exerciseIdProps) {
   const searchParams = req.nextUrl.searchParams

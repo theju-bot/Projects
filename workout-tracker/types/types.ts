@@ -40,3 +40,4 @@ export interface AuthPayload {
   userId: string
   [key: string]: any
 }
+
