@@ -11,10 +11,21 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 
+type Exercise = {
+  _id?: string
+  exercise: string | { _id: string; name: string }
+  sets: number
+  reps: number
+  weight: number
+  notes?: string
+}
+
 type WorkoutPlan = {
   _id: string
   name: string
   date: string
+  exercises: Exercise[]
+  comments?: string
 }
 
 export default function WorkoutPlansPage() {
@@ -32,12 +43,6 @@ export default function WorkoutPlansPage() {
     fetchPlans()
   }, [])
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this plan?')) return
-    await fetch(`/api/workout-plan/${id}`, { method: 'DELETE' })
-    setPlans((prev) => prev.filter((p) => p._id !== id))
-  }
-
   return (
     <div className='min-h-[calc(100vh-4rem)] bg-background py-8'>
       <div className='mx-auto max-w-3xl px-4 md:px-6'>
@@ -54,7 +59,9 @@ export default function WorkoutPlansPage() {
         </div>
 
         {loading ? (
-          <p className='text-muted-foreground text-center text-3xl py-12'>Loading...</p>
+          <p className='text-muted-foreground text-center text-3xl py-12'>
+            Loading...
+          </p>
         ) : plans.length === 0 ? (
           <Card>
             <CardHeader>
@@ -70,37 +77,37 @@ export default function WorkoutPlansPage() {
         ) : (
           <div className='flex flex-col gap-4'>
             {plans.map((plan) => (
-              <Card key={plan._id}>
+              <Card
+                key={plan._id}
+                className='cursor-pointer hover:bg-muted'
+                onClick={() =>
+                  router.push(`/dashboard/workout-plans/${plan._id}/view`)
+                }
+              >
                 <CardHeader>
                   <div className='flex items-center justify-between'>
-                    <div>
-                      <CardTitle>{plan.name}</CardTitle>
+                    <div className='flex-1'>
+                      <CardTitle className='text-lg hover:underline cursor-pointer'>
+                        {plan.name}
+                      </CardTitle>
                       <CardDescription>
                         {new Date(plan.date).toLocaleDateString()}
                       </CardDescription>
                     </div>
-                    <div className='flex gap-2'>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/workout-plans/${plan._id}/edit`,
-                          )
-                        }
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant='destructive'
-                        size='sm'
-                        onClick={() => handleDelete(plan._id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
                   </div>
                 </CardHeader>
+                <CardContent className='text-sm text-muted-foreground flex flex-row justify-between'>
+                  {plan.comments && (
+                    <p className='text-sm mt-2'>
+                      {plan.comments}
+                    </p>
+                  )}
+
+                  <p>
+                    {plan.exercises.length} exercise
+                    {plan.exercises.length !== 1 ? 's' : ''}
+                  </p>
+                </CardContent>
               </Card>
             ))}
           </div>

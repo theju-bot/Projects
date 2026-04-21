@@ -15,7 +15,7 @@ async function getWorkoutPlan(
   const session = getHeaderUser(req)
 
   await connectDB()
-  const workoutPlan = await WorkoutPlan.findById(id)
+  const workoutPlan = await WorkoutPlan.findById(id).populate('exercises.exercise')
   if (!workoutPlan) throw new AppError('Workout plan not found', 404)
 
   checkOwnership(workoutPlan, session)
