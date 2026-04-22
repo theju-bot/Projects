@@ -158,7 +158,7 @@ export default function RegisterPage() {
 
           <CardFooter className='flex flex-col gap-3'>
             <Button type='submit' disabled={isPending}>
-              {isPending && <Loader2 size={16} />}
+              {isPending && <Loader2 size={16} className='animate-spin'/>}
               Create Account
             </Button>
             <p className='text-sm text-muted-foreground'>

@@ -113,7 +113,7 @@ export default function SignInPage() {
 
           <CardFooter className='flex flex-col gap-3'>
             <Button type='submit' className='w-full' disabled={isPending}>
-              {isPending && <Loader2 size={16} />} Sign In
+              {isPending && <Loader2 size={16} className='animate-spin'/>} Sign In
             </Button>
             <p className='text-sm text-muted-foreground'>
               No account?&nbsp;{' '}

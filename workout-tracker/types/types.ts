@@ -23,7 +23,7 @@ export interface WorkoutWT extends Document {
   sets: number
   reps: number
   weight: number
-  notes: string
+  notes?: string
 }
 
 export interface WorkoutPlanWT extends Document {
@@ -31,13 +31,17 @@ export interface WorkoutPlanWT extends Document {
   name: string
   date: Date
   exercises: WorkoutWT[]
-  comments: string
+  comments?: string
 }
 
 export type idProps = { params: Promise<{ id: string }> }
 
-export interface AuthPayload {
-  userId: string
-  [key: string]: any
+export type DynamicParams<T extends Record<string, string> = { id: string }> = {
+  params: Promise<T>
 }
 
+export interface AuthPayload {
+  userId: string
+  iat?: number
+  exp?: number
+}

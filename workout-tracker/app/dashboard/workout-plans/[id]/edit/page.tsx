@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 type Exercise = {
   _id: string
@@ -22,20 +28,32 @@ type ExerciseEntry = {
   notes?: string
 }
 
+type PlanForm = {
+  name: string
+  date: string
+  comments: string
+  exercises: ExerciseEntry[]
+}
+
 export default function EditWorkoutPlanPage() {
   const router = useRouter()
-  const { id } = useParams<{ id: string }>()
+  const params = useParams()
+  const id = params?.id as string
 
-  const [name, setName] = useState('')
-  const [date, setDate] = useState('')
-  const [comments, setComments] = useState('')
-  const [exercises, setExercises] = useState<ExerciseEntry[]>([])
+  const [form, setForm] = useState<PlanForm>({
+    name: '',
+    date: '',
+    comments: '',
+    exercises: [],
+  })
   const [allExercises, setAllExercises] = useState<Exercise[]>([])
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!id) return
+
     const fetchData = async () => {
       try {
         setLoading(true)
@@ -46,25 +64,28 @@ export default function EditWorkoutPlanPage() {
           fetch('/api/exercise'),
         ])
 
+        if (!planRes.ok) throw new Error('Failed to load workout plan')
+        if (!exercisesRes.ok) throw new Error('Failed to load exercises')
+
         const planData = await planRes.json()
         const exercisesData = await exercisesRes.json()
 
-        setName(planData.name)
-        setComments(planData.comments || '')
-        setDate(
-          planData.date
+        setForm({
+          name: planData.name,
+          comments: planData.comments || '',
+          date: planData.date
             ? new Date(planData.date).toISOString().split('T')[0]
             : '',
-        )
-        setExercises(
-          planData.exercises?.map((e: any) => ({
-            exercise: e.exercise._id ?? e.exercise,
-            sets: e.sets,
-            reps: e.reps,
-            weight: e.weight || 0,
-            notes: e.notes || '',
-          })) ?? [],
-        )
+          exercises:
+            planData.exercises?.map((e: any) => ({
+              exercise: e.exercise._id ?? e.exercise,
+              sets: e.sets,
+              reps: e.reps,
+              weight: e.weight || 0,
+              notes: e.notes || '',
+            })) ?? [],
+        })
+
         setAllExercises(exercisesData)
       } catch (err) {
         const message =
@@ -75,78 +96,57 @@ export default function EditWorkoutPlanPage() {
       }
     }
 
-    if (id) {
-      fetchData()
-    }
+    fetchData()
   }, [id])
+
+  const updateForm = (
+    field: keyof Omit<PlanForm, 'exercises'>,
+    value: string,
+  ) => setForm((prev) => ({ ...prev, [field]: value }))
 
   const updateEntry = (
     index: number,
     field: keyof ExerciseEntry,
     value: string | number,
   ) => {
-    setExercises((prev) =>
-      prev.map((e, i) =>
-        i === index
-          ? {
-            ...e,
-            [field]: typeof value === 'string' ? value : value,
-          }
-          : e,
+    setForm((prev) => ({
+      ...prev,
+      exercises: prev.exercises.map((e, i) =>
+        i === index ? { ...e, [field]: value } : e,
       ),
-    )
+    }))
   }
 
   const addExercise = () =>
-    setExercises((prev) => [
+    setForm((prev) => ({
       ...prev,
-      { exercise: '', sets: 3, reps: 10, weight: 0, notes: '' },
-    ])
+      exercises: [
+        ...prev.exercises,
+        { exercise: '', sets: 3, reps: 10, weight: 0, notes: '' },
+      ],
+    }))
 
   const removeExercise = (index: number) =>
-    setExercises((prev) => prev.filter((_, i) => i !== index))
+    setForm((prev) => ({
+      ...prev,
+      exercises: prev.exercises.filter((_, i) => i !== index),
+    }))
 
   const handleSave = async () => {
     setError(null)
-
-    if (!name.trim()) {
-      setError('Plan name is required')
-      return
-    }
-
-    if (exercises.length === 0) {
-      setError('At least one exercise is required')
-      return
-    }
-
-    if (exercises.some((e) => !e.exercise)) {
-      setError('Select an exercise for each entry')
-      return
-    }
-
-    if (exercises.some((e) => e.sets < 1 || e.reps < 1)) {
-      setError('Sets and reps must be at least 1')
-      return
-    }
-
-    if (exercises.some((e) => e.weight < 0)) {
-      setError('Weight must be a positive number')
-      return
-    }
-
     setSaving(true)
     try {
       const payload = {
-        name: name.trim(),
-        exercises: exercises.map((e) => ({
+        name: form.name.trim(),
+        exercises: form.exercises.map((e) => ({
           exercise: e.exercise,
           sets: e.sets,
           reps: e.reps,
           weight: e.weight,
           notes: e.notes?.trim() || undefined,
         })),
-        comments: comments.trim() || undefined,
-        date: date ? new Date(date).toISOString() : undefined,
+        comments: form.comments.trim() || undefined,
+        date: form.date ? form.date : undefined,
       }
 
       const res = await fetch(`/api/workout-plan/${id}`, {
@@ -197,8 +197,8 @@ export default function EditWorkoutPlanPage() {
             <Input
               id='name'
               placeholder='Enter plan name'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={form.name}
+              onChange={(e) => updateForm('name', e.target.value)}
               disabled={saving}
             />
           </div>
@@ -208,8 +208,8 @@ export default function EditWorkoutPlanPage() {
             <Input
               id='date'
               type='date'
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={form.date}
+              onChange={(e) => updateForm('date', e.target.value)}
               disabled={saving}
             />
           </div>
@@ -219,8 +219,8 @@ export default function EditWorkoutPlanPage() {
             <Input
               id='comments'
               placeholder='Add any comments'
-              value={comments}
-              onChange={(e) => setComments(e.target.value)}
+              value={form.comments}
+              onChange={(e) => updateForm('comments', e.target.value)}
               disabled={saving}
             />
           </div>
@@ -228,7 +228,7 @@ export default function EditWorkoutPlanPage() {
 
         <div className='flex flex-col gap-3'>
           <Label>Exercises</Label>
-          {exercises.map((entry, i) => (
+          {form.exercises.map((entry, i) => (
             <Card key={i}>
               <CardContent className='flex flex-col gap-3 pt-4'>
                 <div className='flex flex-col gap-1'>
@@ -238,8 +238,7 @@ export default function EditWorkoutPlanPage() {
                     onValueChange={(val) => updateEntry(i, 'exercise', val)}
                     disabled={saving}
                   >
-                    <SelectTrigger className='w-full' 
-                    >
+                    <SelectTrigger className='w-full'>
                       <SelectValue placeholder='Select exercise' />
                     </SelectTrigger>
                     <SelectContent>
@@ -294,7 +293,9 @@ export default function EditWorkoutPlanPage() {
                 </div>
 
                 <div className='flex flex-col gap-1'>
-                  <Label className='text-sm font-medium'>Notes (Optional)</Label>
+                  <Label className='text-sm font-medium'>
+                    Notes (Optional)
+                  </Label>
                   <Input
                     type='text'
                     placeholder='Add notes'
@@ -329,7 +330,7 @@ export default function EditWorkoutPlanPage() {
         <div className='flex gap-2'>
           <Button
             onClick={handleSave}
-            disabled={saving || exercises.length === 0}
+            disabled={saving || form.exercises.length === 0}
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>

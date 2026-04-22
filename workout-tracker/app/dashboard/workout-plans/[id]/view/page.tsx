@@ -40,7 +40,8 @@ type WorkoutPlanDetail = {
 
 export default function ViewWorkoutPlanPage() {
   const router = useRouter()
-  const { id } = useParams<{ id: string }>()
+  const params = useParams()
+  const id = params?.id as string
 
   const [plan, setPlan] = useState<WorkoutPlanDetail | null>(null)
   const [loading, setLoading] = useState(true)
