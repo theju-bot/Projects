@@ -1,29 +1,15 @@
-// import { MongoClient } from 'mongodb'
-
-// const MONGODB_URI = process.env.MONGODB_URI
-// if (!MONGODB_URI) throw new Error('MONGODB_URI not defined')
-
-// declare global {
-//   var _mongoClient: MongoClient | undefined
-// }
-
-// if (!global._mongoClient) {
-//   global._mongoClient = new MongoClient(MONGODB_URI)
-// }
-
-// export const mongoClient: MongoClient = global._mongoClient
-
-import mongoose, { Mongoose } from 'mongoose'
+import mongoose, { type Mongoose } from 'mongoose'
 import { MongoClient } from 'mongodb'
-
-const MONGODB_URI = process.env.MONGODB_URI
-
-if (!MONGODB_URI) throw new Error('MONGODB_URI not defined')
+import '@/models/Column.model'
+import '@/models/Job.model'
 
 interface MongooseCache {
   conn: Mongoose | null
   promise: Promise<Mongoose> | null
 }
+
+const MONGODB_URI = process.env.MONGODB_URI
+if (!MONGODB_URI) throw new Error('MONGODB_URI is not  defined')
 
 declare global {
   var mongoose: MongooseCache
@@ -39,11 +25,16 @@ export async function connectDB() {
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI as string, {
       bufferCommands: false,
+      family: 4,
+      serverSelectionTimeoutMS: 8000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
     })
   }
 
   try {
     cached.conn = await cached.promise
+    console.log('MongoDB connected successfully (IPv4)')
   } catch (e) {
     cached.promise = null
     throw e
@@ -56,4 +47,4 @@ if (!global._mongoClient) {
   global._mongoClient = new MongoClient(MONGODB_URI as string)
 }
 
-export const mongoClient: MongoClient = global._mongoClient
+export const mongoClient = global._mongoClient
