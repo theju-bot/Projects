@@ -83,7 +83,7 @@ export default function RegisterPage() {
                 placeholder='Your Name'
                 {...register('name')}
               />
-              <FieldError errors={[{ message: errors.name?.message }]} />
+              <FieldError errors={[errors.name]} />
             </Field>
 
             <Field>
@@ -93,7 +93,7 @@ export default function RegisterPage() {
                 placeholder='you@example.com'
                 {...register('email')}
               />
-              <FieldError errors={[{ message: errors.email?.message }]} />
+              <FieldError errors={[errors.email]} />
             </Field>
 
             <Field>
@@ -113,7 +113,7 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <FieldError errors={[{ message: errors.password?.message }]} />
+              <FieldError errors={[errors.password]} />
             </Field>
 
             <Field>
@@ -137,9 +137,7 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
-              <FieldError
-                errors={[{ message: errors.confirmPassword?.message }]}
-              />
+              <FieldError errors={[errors.confirmPassword]} />
             </Field>
 
             <Button type='submit' className='w-full' disabled={isPending}>

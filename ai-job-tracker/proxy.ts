@@ -36,5 +36,3 @@ export const config = {
   ],
 }
 
-// __Secure-better-auth.session_token
-// better-auth.session_token
