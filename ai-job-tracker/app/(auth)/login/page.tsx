@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { authClient } from '@/lib/auth/auth-client'
 import { loginSchema } from '@/lib/validations/user.schema'
 import type { LoginInput } from '@/types/user.types'
@@ -105,6 +105,7 @@ export default function LoginPage() {
             </Field>
 
             <Button type='submit' className='w-full' disabled={isPending}>
+              {isPending && <Loader2 size={16} className='animate-spin' />}
               {isPending ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
