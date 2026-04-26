@@ -21,27 +21,27 @@ export const auth = betterAuth({
       targetRole: {
         type: 'string',
         defaultValue: '',
-        input: true,
+        input: false,
       },
       skills: {
         type: 'string[]',
         defaultValue: [],
-        input: true,
+        input: false,
       },
       yearsOfExperience: {
         type: 'number',
         defaultValue: 0,
-        input: true,
+        input: false,
       },
       bio: {
         type: 'string',
         defaultValue: '',
-        input: true,
+        input: false,
       },
       preferredModel: {
         type: 'string',
         defaultValue: '',
-        input: true,
+        input: false,
       },
       openRouterKey: {
         type: 'string',
