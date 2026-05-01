@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Settings, BarChart2 } from 'lucide-react'
+import { LayoutDashboard, Settings, BarChart2, LogOut } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -35,7 +35,50 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible='icon'>
-      <SidebarHeader></SidebarHeader>
+      <SidebarHeader className='border-b p-4'>
+        <span className='font-bold text-lg tracking-tight group-data-[collapsible=icon]:hidden'>
+          Job Tracker
+        </span>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {links.map(({ href, label, icon: Icon }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === href}
+                    tooltip={label}
+                  >
+                    <Link href={href}>
+                      <Icon size={18} />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className='border-t p-2'>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              tooltip='Sign out'
+              className='cursor-pointer'
+            >
+              <LogOut size={18} />
+              <span>Sign out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }

@@ -25,6 +25,7 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { ModeToggle } from '@/components/shared/ModeToggle'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -67,11 +68,14 @@ export default function RegisterPage() {
   return (
     <div className='min-h-screen flex items-center justify-center p-4'>
       <Card className='w-full max-w-md'>
-        <CardHeader>
-          <CardTitle className='text-2xl'>Create an account</CardTitle>
-          <CardDescription>
-            Start tracking your job applications
-          </CardDescription>
+        <CardHeader className='flex flex-row justify-between items-center'>
+          <div>
+            <CardTitle className='text-2xl'>Create an account</CardTitle>
+            <CardDescription>
+              Start tracking your job applications
+            </CardDescription>
+          </div>
+          <ModeToggle />
         </CardHeader>
 
         <CardContent className='space-y-4'>

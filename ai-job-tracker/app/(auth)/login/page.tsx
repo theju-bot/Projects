@@ -25,6 +25,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+import { ModeToggle } from '@/components/shared/ModeToggle'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -69,8 +70,13 @@ export default function LoginPage() {
     <div className='min-h-screen flex items-center justify-center p-4'>
       <Card className='w-full max-w-md'>
         <CardHeader>
-          <CardTitle className='text-2xl'>Welcome Back</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <div className='flex flex-row justify-between items-center'>
+            <div>
+              <CardTitle className='text-2xl'>Welcome Back</CardTitle>
+              <CardDescription>Sign in to your account</CardDescription>
+            </div>
+            <ModeToggle />
+          </div>
         </CardHeader>
 
         <CardContent className='space-y-4'>
