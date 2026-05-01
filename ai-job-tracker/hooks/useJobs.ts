@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { logClientError } from '@/lib/logClient'
 import type {
   Job,
   CreateJobInput,
@@ -86,6 +87,7 @@ export function useCreateJob() {
       toast.success('Job added')
     },
     onError: (err: Error) => {
+      logClientError('useCreateJob', err)
       toast.error(err.message ?? 'Failed to add job')
     },
   })
@@ -101,6 +103,7 @@ export function useUpdateJob() {
       toast.success('Job updated')
     },
     onError: (err: Error) => {
+      logClientError('useUpdateJob', err)
       toast.error(err.message ?? 'Failed to update job')
     },
   })
@@ -115,6 +118,7 @@ export function useMoveJob() {
       queryClient.invalidateQueries({ queryKey: JOBS_KEY })
     },
     onError: (err: Error) => {
+      logClientError('useMoveJob', err)
       toast.error(err.message ?? 'Failed to move job')
       queryClient.invalidateQueries({ queryKey: JOBS_KEY })
     },
@@ -130,6 +134,7 @@ export function useDeleteJob() {
       toast.success('Job deleted')
     },
     onError: (err: Error) => {
+      logClientError('useDeleteJob', err)
       toast.error(err.message ?? 'Failed to delete job')
     },
   })

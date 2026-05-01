@@ -1,15 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 import { AppError } from './AppError'
+import { logger } from '../logger'
 
 type RouteHandler = (req: NextRequest, ctx?: any) => Promise<NextResponse>
 
 export function withErrorHandler(handler: RouteHandler) {
   return async (req: NextRequest, ctx?: any): Promise<NextResponse> => {
+    const start = Date.now()
+    const method = req.method
+    const path = new URL(req.url).pathname
+
     try {
-      return await handler(req, ctx)
+      const response = await handler(req, ctx)
+      const duration = Date.now() - start
+      logger.request(method, path, response.status, duration)
+      return response
     } catch (err) {
-      return handleApiError(err)
+      const duration = Date.now() - start
+      const errorResponse = handleApiError(err)
+
+      logger.error(method, path, errorResponse.status, duration, {
+        code: err instanceof AppError ? err.code : err instanceof ZodError ? 'VALIDATION_ERROR' : undefined,
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      })
+
+      return errorResponse
     }
   }
 }

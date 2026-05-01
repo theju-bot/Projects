@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { logClientError } from '@/lib/logClient'
 import type {
   Column,
   CreateColumnInput,
@@ -47,7 +48,7 @@ async function updateColumn(
 }
 
 async function deleteColumn(id: string): Promise<void> {
-  const res = await fetch(`/api/colums/${id}`, { method: 'DELETE' })
+  const res = await fetch(`/api/columns/${id}`, { method: 'DELETE' })
   const data = await res.json()
   if (!data.success) throw new Error(data.message)
 }
@@ -68,21 +69,41 @@ export function useCreateColumn() {
       toast.success('Column created')
     },
     onError: (err: Error) => {
+      logClientError('useCreateColumn', err)
       toast.error(err.message ?? 'Failed to create column')
     },
   })
 }
 
+// changed
 export function useUpdateColumn() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateColumnInput }) =>
       updateColumn(id, input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: COLUMNS_KEY })
+    onMutate: async ({ id, input }) => {
+      await queryClient.cancelQueries({ queryKey: COLUMNS_KEY })
+
+      const previousColumns = queryClient.getQueryData<Column[]>(COLUMNS_KEY)
+
+      queryClient.setQueryData<Column[]>(
+        COLUMNS_KEY,
+        (old) =>
+          old?.map((col) => (col._id === id ? { ...col, ...input } : col)) ??
+          [],
+      )
+
+      return { previousColumns }
     },
-    onError: (err: Error) => {
+    onError: (err: Error, _variables, context) => {
+      if (context?.previousColumns) {
+        queryClient.setQueryData(COLUMNS_KEY, context.previousColumns)
+      }
+      logClientError('useUpdateColumn', err)
       toast.error(err.message ?? 'Failed to update column')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: COLUMNS_KEY })
     },
   })
 }
@@ -96,6 +117,7 @@ export function useDeleteColumn() {
       toast.success('Column deleted')
     },
     onError: (err: Error) => {
+      logClientError('useDeleteColumn', err)
       toast.error(err.message ?? 'Failed to delete column')
     },
   })
