@@ -9,7 +9,7 @@ export const createJobSchema = z.object({
   description: z.string().optional(),
   notes: z.string().optional(),
   columnId: z.string().min(1, 'Column is required'),
-  appliedAt: z.coerce.date().optional().nullable(),
+  appliedAt: z.date().optional().nullable(),
 })
 
 export const updateJobSchema = createJobSchema.partial().extend({
