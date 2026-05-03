@@ -44,3 +44,18 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
 
   return NextResponse.json({ success: true, message: 'API key removed' })
 })
+
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  const session = await requireSession(req)
+
+  const db = mongoClient.db()
+  const user = await db.collection('user').findOne(
+    { id: session.user.id },
+    { projection: { openRouterKey: 1  } }
+  )
+
+  return NextResponse.json({
+    success: true,
+    hasKey: !!user?.openRouterKey,
+  })
+})
