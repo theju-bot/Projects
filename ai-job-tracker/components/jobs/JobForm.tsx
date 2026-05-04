@@ -3,7 +3,12 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCreateJob, useUpdateJob, useJob } from '@/hooks/useJobs'
+import {
+  useCreateJob,
+  useUpdateJob,
+  useJob,
+  useDeleteJob,
+} from '@/hooks/useJobs'
 import { useColumns } from '@/hooks/useColumns'
 import { createJobSchema } from '@/lib/validations/job.schema'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
@@ -31,6 +36,7 @@ export function JobForm({ jobId, onSuccess }: Props) {
   const { data: columns = [] } = useColumns()
   const { mutate: createJob, isPending: isCreating } = useCreateJob()
   const { mutate: updateJob, isPending: isUpdating } = useUpdateJob()
+  const { mutate: deleteJob, isPending: isDeleting } = useDeleteJob()
 
   const {
     register,
@@ -75,7 +81,12 @@ export function JobForm({ jobId, onSuccess }: Props) {
     }
   }
 
-  const isPending = isCreating || isUpdating
+  function handleDelete() {
+    if (!jobId) return
+    deleteJob(jobId, { onSuccess })
+  }
+
+  const isPending = isCreating || isUpdating || isDeleting
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -150,6 +161,16 @@ export function JobForm({ jobId, onSuccess }: Props) {
       </Field>
 
       <div className='flex gap-2 justify-end'>
+        {isEditing && (
+          <Button
+            variant='destructive'
+            type='button'
+            disabled={isPending}
+            onClick={handleDelete}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete Job'}
+          </Button>
+        )}
         <Button type='submit' disabled={isPending}>
           {isPending ? 'Saving...' : isEditing ? 'Update Job' : 'Add Job'}
         </Button>

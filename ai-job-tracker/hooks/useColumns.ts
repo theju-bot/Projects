@@ -75,7 +75,6 @@ export function useCreateColumn() {
   })
 }
 
-// changed
 export function useUpdateColumn() {
   const queryClient = useQueryClient()
   return useMutation({

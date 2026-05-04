@@ -10,7 +10,8 @@ import type { Job } from '@/types/job.types'
 import { JobCard } from './JobCard'
 import { AddJobButton } from './AddJobButton'
 import { Button } from '@/components/ui/button'
-import { Input } from '../ui/input'
+import { Input } from '@/components/ui/input'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type Props = {
   column: Column
@@ -42,7 +43,7 @@ export function KanbanColumn({ column, jobs }: Props) {
             style={{ backgroundColor: column.color }}
           />
           {isEditing ? (
-            <input
+            <Input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -67,15 +68,20 @@ export function KanbanColumn({ column, jobs }: Props) {
           >
             <Pencil size={16} />
           </Button>
-
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-6 w-6 text-destructive hover:text-destructive'
-            onClick={() => deleteColumn(column._id)}
-          >
-            <Trash2 size={12} />
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-6 w-6 text-destructive hover:text-destructive'
+              >
+                <Trash2 size={12} />
+              </Button>
+            }
+            title='Delete Column?'
+            description={`This will delete "${column.name}" and all its cards.`}
+            onConfirm={() => deleteColumn(column._id)}
+          />
         </div>
       </div>
 
