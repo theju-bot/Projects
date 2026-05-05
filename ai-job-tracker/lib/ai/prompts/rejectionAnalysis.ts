@@ -1,14 +1,6 @@
-export interface RejectionAnalysisContext {
-  jobTitle: string
-  company: string
-  jobDescription: string
-  targetRole: string
-  skills: string[]
-  yearsOfExperience: number
-  bio: string
-}
+import type { FullPromptContext } from '@/types/ai.types'
 
-export function buildRejectionAnalysisPrompt(ctx: RejectionAnalysisContext): string {
+export function buildRejectionAnalysisPrompt(ctx: FullPromptContext): string {
   return `You are a career advisor helping a job seeker learn from a job rejection.
 
 Analyze this situation and provide constructive feedback.

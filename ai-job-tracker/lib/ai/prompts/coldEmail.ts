@@ -1,15 +1,6 @@
-export interface ColdEmailContext {
-  jobTitle: string
-  company: string
-  jobDescription: string
-  applicantName: string
-  targetRole: string
-  skills: string[]
-  yearsOfExperience: number
-  bio: string
-}
+import type { FullPromptContext } from '@/types/ai.types'
 
-export function buildColdEmailPrompt(ctx: ColdEmailContext): string {
+export function buildColdEmailPrompt(ctx: FullPromptContext): string {
   return `You are helping a job seeker write a cold outreach email to a recruiter or hiring manager.
 
 Write a short, compelling cold email for this situation:

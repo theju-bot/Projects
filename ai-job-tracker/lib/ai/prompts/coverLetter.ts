@@ -1,15 +1,6 @@
-export interface CoverLetterContext {
-  jobTitle: string
-  company: string
-  jobDescription: string
-  applicantName: string
-  targetRole: string
-  skills: string[]
-  yearsOfExperience: number
-  bio: string
-}
+import type { FullPromptContext } from '@/types/ai.types'
 
-export function buildCoverLetterPrompt(ctx: CoverLetterContext): string {
+export function buildCoverLetterPrompt(ctx: FullPromptContext): string {
   return `You are a professional cover letter writer helping job seekers land remote positions.
 
 Write a concise, tailored cover letter for the following:

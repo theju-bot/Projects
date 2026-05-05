@@ -1,11 +1,6 @@
-export interface FollowUpContext {
-  jobTitle: string
-  company: string
-  applicantName: string
-  appliedAt: string | null
-}
+import type { FullPromptContext } from '@/types/ai.types'
 
-export function buildFollowUpPrompt(ctx: FollowUpContext): string {
+export function buildFollowUpPrompt(ctx: FullPromptContext): string {
   return `You are helping a job seeker write a follow-up email after submitting a job application.
 
 SITUATION:

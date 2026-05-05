@@ -1,14 +1,6 @@
-export interface GapAnalysisContext {
-  jobTitle: string
-  company: string
-  jobDescription: string
-  targetRole: string
-  skills: string[]
-  yearsOfExperience: number
-  bio: string
-}
+import type { FullPromptContext } from '@/types/ai.types'
 
-export function buildGapAnalysisPrompt(ctx: GapAnalysisContext): string {
+export function buildGapAnalysisPrompt(ctx: FullPromptContext): string {
   return `You are a career advisor helping job seekers evaluate whether to apply for a role.
 
 Analyze the fit between the job and the applicant profile.
@@ -30,7 +22,7 @@ Provide a structured analysis with these sections:
 
 Overall Fit: (Strong / Moderate / Weak) — one sentence verdict
 
-Strengths:
+Strengths: 
 - List 3-4 things the applicant has that match the role
 
 Gaps:

@@ -1,12 +1,6 @@
-export interface InterviewPrepContext {
-  jobTitle: string
-  company: string
-  jobDescription: string
-  skills: string[]
-  yearsOfExperience: number
-}
+import type { FullPromptContext } from '@/types/ai.types'
 
-export function buildInterviewPrepPrompt(ctx: InterviewPrepContext): string {
+export function buildInterviewPrepPrompt(ctx: FullPromptContext): string {
   return `You are a career coach helping a job seeker prepare for a job interview.
 
 Generate targeted interview preparation based on the following:
