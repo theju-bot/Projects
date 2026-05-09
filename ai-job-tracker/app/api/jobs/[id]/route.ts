@@ -30,6 +30,67 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: any) => {
 
   await connectDB()
 
+  if (parsed.order !== undefined || parsed.columnId !== undefined) {
+    const existingJob = await Job.findOne({ _id: id, userId: session.user.id })
+    if (!existingJob) throw new AppError('Job not found', 404, 'JOB_NOT_FOUND')
+
+    const oldColumnId = existingJob.columnId.toString()
+    const newColumnId = parsed.columnId || oldColumnId
+    const newOrder = parsed.order ?? existingJob.order
+
+    if (oldColumnId === newColumnId) {
+      const oldOrder = existingJob.order
+      if (oldOrder !== newOrder) {
+        if (newOrder < oldOrder) {
+          await Job.updateMany(
+            {
+              userId: session.user.id,
+              columnId: newColumnId,
+              _id: { $ne: id },
+              order: { $gte: newOrder, $lt: oldOrder },
+            },
+            { $inc: { order: 1 } },
+          )
+        } else {
+          await Job.updateMany(
+            {
+              userId: session.user.id,
+              columnId: newColumnId,
+              _id: { $ne: id },
+              order: { $gt: oldOrder, $lte: newOrder },
+            },
+            { $inc: { order: -1 } },
+          )
+        }
+      }
+    } else {
+      await Job.updateMany(
+        {
+          userId: session.user.id,
+          columnId: oldColumnId,
+          order: { $gt: existingJob.order },
+        },
+        { $inc: { order: -1 } },
+      )
+      await Job.updateMany(
+        {
+          userId: session.user.id,
+          columnId: newColumnId,
+          order: { $gte: newOrder },
+        },
+        { $inc: { order: 1 } },
+      )
+    }
+
+    const job = await Job.findOneAndUpdate(
+      { _id: id, userId: session.user.id },
+      { $set: { ...parsed, columnId: newColumnId, order: newOrder } },
+      { new: true },
+    )
+
+    return NextResponse.json({ success: true, data: job })
+  }
+
   const job = await Job.findOneAndUpdate(
     { _id: id, userId: session.user.id },
     { $set: parsed },

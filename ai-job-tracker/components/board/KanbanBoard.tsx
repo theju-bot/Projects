@@ -33,6 +33,7 @@ export function KanbanBoard() {
 
   const [activeJob, setActiveJob] = useState<Job | null>(null)
   const [localJobs, setLocalJobs] = useState<Job[]>(jobs)
+  const [isMoving, setIsMoving] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -40,7 +41,9 @@ export function KanbanBoard() {
     }),
   )
 
-  const filteredJobs = (localJobs.length ? localJobs : jobs).filter(
+  const currentJobs = localJobs.length ? localJobs : jobs
+
+  const filteredJobs = currentJobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -53,27 +56,29 @@ export function KanbanBoard() {
   }
 
   function onDragStart(event: DragStartEvent) {
-    const job = jobs.find((j) => j._id === event.active.id)
+    if (isMoving) return
+    const job = currentJobs.find((j) => j._id === event.active.id)
     if (job) setActiveJob(job)
   }
 
   function onDragOver(event: DragOverEvent) {
+    if (isMoving) return
     const { active, over } = event
     if (!over) return
 
     const activeJobId = active.id as string
     const overId = over.id as string
 
-    const activeJob = jobs.find((j) => j._id === activeJobId)
-    if (!activeJob) return
+    const draggedJob = currentJobs.find((j) => j._id === activeJobId)
+    if (!draggedJob) return
 
-    const overJob = jobs.find((j) => j._id === overId)
+    const overJob = currentJobs.find((j) => j._id === overId)
     const overColumn = columns.find((c) => c._id === overId)
 
     const targetColumnId = overJob ? overJob.columnId : overColumn?._id
     if (!targetColumnId) return
 
-    if (activeJob.columnId !== targetColumnId) {
+    if (draggedJob.columnId !== targetColumnId) {
       setLocalJobs((prev) => {
         const updated = prev.length ? [...prev] : [...jobs]
         return updated.map((j) =>
@@ -87,7 +92,7 @@ export function KanbanBoard() {
     const { active, over } = event
     setActiveJob(null)
 
-    if (!over) {
+    if (isMoving || !over) {
       setLocalJobs([])
       return
     }
@@ -95,28 +100,59 @@ export function KanbanBoard() {
     const activeJobId = active.id as string
     const overId = over.id as string
 
-    const activeJob = jobs.find((j) => j._id === activeJobId)
-    if (!activeJob) return
+    if (activeJobId === overId) {
+      setLocalJobs([])
+      return
+    }
 
-    const overJob = jobs.find((j) => j._id === overId)
+    const draggedJob = currentJobs.find((j) => j._id === activeJobId)
+    if (!draggedJob) return
+
+    const overJob = currentJobs.find((j) => j._id === overId)
     const overColumn = columns.find((c) => c._id === overId)
 
     const targetColumnId = overJob ? overJob.columnId : overColumn?._id
     if (!targetColumnId) return
 
-    const jobsInTarget = jobs
-      .filter((j) => j.columnId === targetColumnId && j._id !== activeJobId)
-      .sort((a, b) => a.order - b.order)
+    const originalJob = jobs.find((j) => j._id === activeJobId)
+    const isSameColumn = originalJob
+      ? originalJob.columnId === targetColumnId
+      : draggedJob.columnId === targetColumnId
 
-    const overIndex = overJob
-      ? jobsInTarget.findIndex((j) => j._id === overId)
-      : jobsInTarget.length
+    let newOrder: number
+    if (isSameColumn) {
+      const allJobsInColumn = currentJobs
+        .filter((j) => j.columnId === targetColumnId)
+        .sort((a, b) => a.order - b.order)
 
-    const newOrder = overIndex
+      if (overJob) {
+        const overIndex = allJobsInColumn.findIndex((j) => j._id === overId)
+        newOrder = overIndex === -1 ? allJobsInColumn.length - 1 : overIndex
+      } else {
+        newOrder = allJobsInColumn.length - 1
+      }
+    } else {
+      const jobsInTarget = currentJobs
+        .filter((j) => j.columnId === targetColumnId && j._id !== activeJobId)
+        .sort((a, b) => a.order - b.order)
 
+      if (overJob) {
+        const overIndex = jobsInTarget.findIndex((j) => j._id === overId)
+        newOrder = overIndex === -1 ? jobsInTarget.length : overIndex
+      } else {
+        newOrder = jobsInTarget.length
+      }
+    }
+
+    setIsMoving(true)
     moveJob(
       { id: activeJobId, input: { columnId: targetColumnId, order: newOrder } },
-      { onSettled: () => setLocalJobs([]) },
+      {
+        onSettled: () => {
+          setLocalJobs([])
+          setIsMoving(false)
+        },
+      },
     )
   }
 
@@ -130,7 +166,9 @@ export function KanbanBoard() {
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
     >
-      <div className='flex gap-4 h-full overflow-x-auto pb-4'>
+      <div
+        className={`flex gap-4 h-full overflow-x-auto pb-4 transition-opacity ${isMoving ? 'pointer-events-none cursor-not-allowed opacity-70' : ''}`}
+      >
         <SortableContext
           items={columns.map((c) => c._id)}
           strategy={horizontalListSortingStrategy}

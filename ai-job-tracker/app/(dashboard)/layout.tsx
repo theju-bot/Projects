@@ -4,6 +4,7 @@ import { AppSidebar } from '@/components/shared/AppSidebar'
 import { Navbar } from '@/components/shared/NavBar'
 import { AddJobModal } from '@/components/jobs/AddJobModal'
 import { EditJobModal } from '@/components/jobs/EditJobModal'
+import { AiOutputDialog } from '@/components/ai/AiOutputDialog'
 
 export default function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default function DashboardLayout({
       </SidebarProvider>
       <AddJobModal />
       <EditJobModal />
+      <AiOutputDialog />
     </TooltipProvider>
   )
 }

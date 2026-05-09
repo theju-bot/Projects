@@ -1,5 +1,6 @@
 import { AppError } from '@/lib/errors/AppError'
 import { mongoClient } from '@/lib/db/mongodb'
+import { ObjectId } from 'mongodb'
 import CryptoJS from 'crypto-js'
 import { connectDB } from '@/lib/db/mongodb'
 import { Job } from '@/models/Job.model'
@@ -10,7 +11,7 @@ export const DEFAULT_MODEL = 'operouter/free'
 
 export async function getAiContext(userId: string) {
   const db = mongoClient.db()
-  const user = await db.collection('user').findOne({ id: userId })
+  const user = await db.collection('user').findOne({ _id: new ObjectId(userId) })
 
   if (!user?.openRouterKey) {
     throw new AppError(

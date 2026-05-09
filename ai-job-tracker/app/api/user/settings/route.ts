@@ -4,6 +4,7 @@ import { withErrorHandler } from '@/lib/errors/errorHandler'
 import { AppError } from '@/lib/errors/AppError'
 import { saveApiKeySchema } from '@/lib/validations/user.schema'
 import { mongoClient } from '@/lib/db/mongodb'
+import { ObjectId } from 'mongodb'
 import CryptoJS from 'crypto-js'
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!
@@ -26,7 +27,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const db = mongoClient.db()
   await db
     .collection('user')
-    .updateOne({ id: session.user.id }, { $set: { openRouterKey: encrypted } })
+    .updateOne({ _id: new ObjectId(session.user.id) }, { $set: { openRouterKey: encrypted } })
 
   return NextResponse.json({ success: true, message: 'API key saved' })
 })
@@ -37,7 +38,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
   const db = mongoClient.db()
   await db.collection('user').updateOne(
     {
-      id: session.user.id,
+      _id: new ObjectId(session.user.id),
     },
     { $unset: { openRouterKey: '' } },
   )
@@ -50,7 +51,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   const db = mongoClient.db()
   const user = await db.collection('user').findOne(
-    { id: session.user.id },
+    { _id: new ObjectId(session.user.id) },
     { projection: { openRouterKey: 1  } }
   )
 

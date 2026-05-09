@@ -13,7 +13,7 @@ export function AddJobButton({ columnId }: { columnId: string }) {
       variant='ghost'
       size='sm'
       className='w-full justify-start gap-2 text-muted-foreground'
-      onClick={() => dispatch(openAddJobModal())}
+      onClick={() => dispatch(openAddJobModal(columnId))}
     >
       <Plus size={14} />
       Add Job

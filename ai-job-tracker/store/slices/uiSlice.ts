@@ -8,6 +8,7 @@ interface UIState {
   searchQuery: string
   isAIDialogOpen: boolean
   aiDialogJobId: string | null
+  addJobColumnId: string | null
 }
 
 const initialState: UIState = {
@@ -17,17 +18,20 @@ const initialState: UIState = {
   searchQuery: '',
   isAIDialogOpen: false,
   aiDialogJobId: null,
+  addJobColumnId: null,
 }
 
 const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    openAddJobModal(state) {
+    openAddJobModal(state, action: PayloadAction<string | undefined>) {
       state.isAddJobModalOpen = true
+      state.addJobColumnId = action.payload || null
     },
     closeAddJobModal(state) {
       state.isAddJobModalOpen = false
+      state.addJobColumnId = null
     },
     openEditJobModal(state, action: PayloadAction<string>) {
       state.isEditJobModalOpen = true
@@ -73,3 +77,4 @@ export const selectSearchQuery = (state: RootState) => state.ui.searchQuery
 export const selectIsAIDialogOpen = (state: RootState) =>
   state.ui.isAIDialogOpen
 export const selectAIDialogJobId = (state: RootState) => state.ui.aiDialogJobId
+export const selectAddJobColumnId = (state: RootState) => state.ui.addJobColumnId

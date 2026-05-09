@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { CreateJobInput } from '@/types/job.types'
+import { useAppSelector } from '@/store/hooks'
+import { selectAddJobColumnId } from '@/store/slices/uiSlice'
 
 type Props = {
   jobId?: string
@@ -31,6 +33,8 @@ type Props = {
 
 export function JobForm({ jobId, onSuccess }: Props) {
   const isEditing = !!jobId
+
+  const initialColumnId = useAppSelector(selectAddJobColumnId)
 
   const { data: job } = useJob(jobId || '')
   const { data: columns = [] } = useColumns()
@@ -54,7 +58,7 @@ export function JobForm({ jobId, onSuccess }: Props) {
       salary: '',
       description: '',
       notes: '',
-      columnId: columns[0]?._id || '',
+      columnId: initialColumnId || columns[0]?._id || '',
     },
   })
 
@@ -70,8 +74,13 @@ export function JobForm({ jobId, onSuccess }: Props) {
       setValue('description', job.description)
       setValue('notes', job.notes)
       setValue('columnId', job.columnId)
+    } else if (!isEditing && columns.length > 0) {
+      const currentColumnId = watch('columnId')
+      if (!currentColumnId) {
+        setValue('columnId', initialColumnId || columns[0]?._id || '')
+      }
     }
-  }, [job, isEditing, setValue])
+  }, [job, columns, isEditing, setValue, initialColumnId, watch])
 
   function onSubmit(data: CreateJobInput) {
     if (isEditing && jobId) {

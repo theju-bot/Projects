@@ -7,7 +7,6 @@ import { useAppDispatch } from '@/store/hooks'
 import { openEditJobModal, openAIDialog } from '@/store/slices/uiSlice'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import type { Job } from '@/types/job.types'
 import { cn } from '@/lib/utils'
 import { AiActionButton } from '@/components/ai/AiActionButton'
@@ -53,17 +52,8 @@ export function JobCard({ job, isDragging = false }: Props) {
               onClick={() => dispatch(openEditJobModal(job._id))}
             >
               <p className='text-sm font-medium leading-tight'>{job.title}</p>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='h-6 w-6 shrink-0'
-                onClick={(e) => {
-                  e.stopPropagation()
-                  dispatch(openAIDialog(job._id))
-                }}
-              >
-                <AiActionButton jobId={job._id} />
-              </Button>
+
+              <AiActionButton jobId={job._id} />
             </div>
 
             <div className='flex items-center gap-1 text-xs text-muted-foreground'>
