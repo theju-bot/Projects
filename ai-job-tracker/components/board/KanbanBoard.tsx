@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -32,8 +32,15 @@ export function KanbanBoard() {
   const { mutate: moveJob } = useMoveJob()
 
   const [activeJob, setActiveJob] = useState<Job | null>(null)
-  const [localJobs, setLocalJobs] = useState<Job[]>(jobs)
+  const [localJobs, setLocalJobs] = useState<Job[]>([])
   const [isMoving, setIsMoving] = useState(false)
+  const isDraggingRef = useRef(false)
+
+  useEffect(() => {
+    if (!isDraggingRef.current) {
+      setLocalJobs(jobs)
+    }
+  }, [jobs])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -41,23 +48,28 @@ export function KanbanBoard() {
     }),
   )
 
-  const currentJobs = localJobs.length ? localJobs : jobs
-
-  const filteredJobs = currentJobs.filter(
+  const filteredJobs = localJobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  function getJobByColumn(columnId: string) {
+  function getJobsByColumn(columnId: string) {
     return filteredJobs
       .filter((job) => job.columnId === columnId)
       .sort((a, b) => a.order - b.order)
   }
 
+  function resolveTargetColumnId(overId: string): string | undefined {
+    const overJob = localJobs.find((j) => j._id === overId)
+    const overColumn = columns.find((c) => c._id === overId)
+    return overJob ? overJob.columnId : overColumn?._id
+  }
+
   function onDragStart(event: DragStartEvent) {
     if (isMoving) return
-    const job = currentJobs.find((j) => j._id === event.active.id)
+    isDraggingRef.current = true
+    const job = localJobs.find((j) => j._id === event.active.id)
     if (job) setActiveJob(job)
   }
 
@@ -67,25 +79,17 @@ export function KanbanBoard() {
     if (!over) return
 
     const activeJobId = active.id as string
-    const overId = over.id as string
-
-    const draggedJob = currentJobs.find((j) => j._id === activeJobId)
-    if (!draggedJob) return
-
-    const overJob = currentJobs.find((j) => j._id === overId)
-    const overColumn = columns.find((c) => c._id === overId)
-
-    const targetColumnId = overJob ? overJob.columnId : overColumn?._id
+    const targetColumnId = resolveTargetColumnId(over.id as string)
     if (!targetColumnId) return
 
-    if (draggedJob.columnId !== targetColumnId) {
-      setLocalJobs((prev) => {
-        const updated = prev.length ? [...prev] : [...jobs]
-        return updated.map((j) =>
-          j._id === activeJobId ? { ...j, columnId: targetColumnId } : j,
-        )
-      })
-    }
+    const draggedJob = localJobs.find((j) => j._id === activeJobId)
+    if (!draggedJob || draggedJob.columnId === targetColumnId) return
+
+    setLocalJobs((prev) =>
+      prev.map((j) =>
+        j._id === activeJobId ? { ...j, columnId: targetColumnId } : j,
+      ),
+    )
   }
 
   function onDragEnd(event: DragEndEvent) {
@@ -93,63 +97,80 @@ export function KanbanBoard() {
     setActiveJob(null)
 
     if (isMoving || !over) {
-      setLocalJobs([])
+      setLocalJobs(jobs)
       return
     }
 
     const activeJobId = active.id as string
     const overId = over.id as string
 
-    if (activeJobId === overId) {
-      setLocalJobs([])
-      return
-    }
-
-    const draggedJob = currentJobs.find((j) => j._id === activeJobId)
+    const draggedJob = localJobs.find((j) => j._id === activeJobId)
     if (!draggedJob) return
 
-    const overJob = currentJobs.find((j) => j._id === overId)
-    const overColumn = columns.find((c) => c._id === overId)
-
-    const targetColumnId = overJob ? overJob.columnId : overColumn?._id
+    const targetColumnId = resolveTargetColumnId(overId)
     if (!targetColumnId) return
 
     const originalJob = jobs.find((j) => j._id === activeJobId)
-    const isSameColumn = originalJob
-      ? originalJob.columnId === targetColumnId
-      : draggedJob.columnId === targetColumnId
+    const isSameColumn = (originalJob ?? draggedJob).columnId === targetColumnId
+
+    if (activeJobId === overId && isSameColumn) {
+      setLocalJobs(jobs)
+      return
+    }
+
+    const overJob = localJobs.find((j) => j._id === overId)
 
     let newOrder: number
+
     if (isSameColumn) {
-      const allJobsInColumn = currentJobs
+      const jobsInColumn = localJobs
         .filter((j) => j.columnId === targetColumnId)
         .sort((a, b) => a.order - b.order)
 
-      if (overJob) {
-        const overIndex = allJobsInColumn.findIndex((j) => j._id === overId)
-        newOrder = overIndex === -1 ? allJobsInColumn.length - 1 : overIndex
-      } else {
-        newOrder = allJobsInColumn.length - 1
-      }
+      const overIndex = overJob
+        ? jobsInColumn.findIndex((j) => j._id === overId)
+        : jobsInColumn.length - 1
+
+      newOrder = overIndex === -1 ? jobsInColumn.length - 1 : overIndex
     } else {
-      const jobsInTarget = currentJobs
+      const jobsInTarget = localJobs
         .filter((j) => j.columnId === targetColumnId && j._id !== activeJobId)
         .sort((a, b) => a.order - b.order)
 
-      if (overJob) {
-        const overIndex = jobsInTarget.findIndex((j) => j._id === overId)
-        newOrder = overIndex === -1 ? jobsInTarget.length : overIndex
-      } else {
-        newOrder = jobsInTarget.length
-      }
+      const overIndex = overJob
+        ? jobsInTarget.findIndex((j) => j._id === overId)
+        : jobsInTarget.length
+
+      newOrder = overIndex === -1 ? jobsInTarget.length : overIndex
     }
+
+    setLocalJobs((prev) => {
+      const updated = prev.map((j) => ({ ...j }))
+      const activeIndex = updated.findIndex((j) => j._id === activeJobId)
+      if (activeIndex === -1) return updated
+
+      const [moved] = updated.splice(activeIndex, 1)
+      moved.columnId = targetColumnId
+
+      const jobsInTarget = updated
+        .filter((j) => j.columnId === targetColumnId)
+        .sort((a, b) => a.order - b.order)
+
+      jobsInTarget.splice(newOrder, 0, moved)
+      jobsInTarget.forEach((job, index) => {
+        job.order = index
+      })
+
+      const otherJobs = updated.filter((j) => j.columnId !== targetColumnId)
+      return [...otherJobs, ...jobsInTarget]
+    })
 
     setIsMoving(true)
     moveJob(
       { id: activeJobId, input: { columnId: targetColumnId, order: newOrder } },
       {
         onSettled: () => {
-          setLocalJobs([])
+          isDraggingRef.current = false
           setIsMoving(false)
         },
       },
@@ -159,6 +180,7 @@ export function KanbanBoard() {
   if (columnsLoading || jobsLoading) {
     return <div className='text-muted-foreground text-sm'>Loading Board...</div>
   }
+
   return (
     <DndContext
       sensors={sensors}
@@ -167,7 +189,9 @@ export function KanbanBoard() {
       onDragEnd={onDragEnd}
     >
       <div
-        className={`flex gap-4 h-full overflow-x-auto pb-4 transition-opacity ${isMoving ? 'pointer-events-none cursor-not-allowed opacity-70' : ''}`}
+        className={`flex gap-4 h-full overflow-x-auto pb-4 transition-opacity ${
+          isMoving ? 'pointer-events-none cursor-not-allowed opacity-70' : ''
+        }`}
       >
         <SortableContext
           items={columns.map((c) => c._id)}
@@ -177,12 +201,13 @@ export function KanbanBoard() {
             <KanbanColumn
               key={column._id}
               column={column}
-              jobs={getJobByColumn(column._id)}
+              jobs={getJobsByColumn(column._id)}
             />
           ))}
         </SortableContext>
         <AddColumnButton />
       </div>
+
       <DragOverlay>
         {activeJob && <JobCard job={activeJob} isDragging />}
       </DragOverlay>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Settings, BarChart2, LogOut } from 'lucide-react'
+import { LayoutDashboard, Settings, BarChart2, LogOut, User } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -27,6 +27,7 @@ const links = [
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { data: session } = authClient.useSession()
 
   async function handleSignOut() {
     await authClient.signOut()
@@ -67,11 +68,19 @@ export function AppSidebar() {
 
       <SidebarFooter className='border-t p-2'>
         <SidebarMenu>
+          {session?.user && (
+            <SidebarMenuItem>
+              <SidebarMenuButton className='cursor-default hover:bg-transparent hover:text-current' tooltip={session.user.name}>
+                <User size={18} />
+                <span className='truncate font-medium'>{session.user.name}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
               tooltip='Sign out'
-              className='cursor-pointer'
+              className='cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50'
             >
               <LogOut size={18} />
               <span>Sign out</span>

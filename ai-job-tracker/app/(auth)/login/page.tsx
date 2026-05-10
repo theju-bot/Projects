@@ -95,8 +95,9 @@ export default function LoginPage() {
               <FieldLabel>Password</FieldLabel>
               <div className='relative'>
                 <Input
-                  type='password'
+                  type={showPassword ? 'text' : 'password'}
                   placeholder='••••••••'
+                  className='pr-10'
                   {...register('password')}
                 />
                 <button
