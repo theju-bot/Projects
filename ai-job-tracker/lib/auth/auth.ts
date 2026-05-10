@@ -39,31 +39,37 @@ export const auth = betterAuth({
       },
     },
   },
-  
+
   user: {
     additionalFields: {
       targetRole: {
         type: 'string',
+        required: false,
         defaultValue: '',
       },
       skills: {
         type: 'string[]',
+        required: false,
         defaultValue: [],
       },
       yearsOfExperience: {
         type: 'number',
+        required: false,
         defaultValue: 0,
       },
       bio: {
         type: 'string',
+        required: false,
         defaultValue: '',
       },
       preferredModel: {
         type: 'string',
+        required: false,
         defaultValue: '',
       },
       openRouterKey: {
         type: 'string',
+        required: false,
         defaultValue: '',
         returned: false,
       },
