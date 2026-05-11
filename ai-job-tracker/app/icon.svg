@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>AI Job Tracker</title>
+  <rect width="512" height="512" rx="96" fill="#1a1a2e"/>
+  <!-- briefcase body -->
+  <rect x="128" y="272" width="256" height="180" rx="20" fill="#4f46e5"/>
+  <!-- briefcase handle -->
+  <rect x="188" y="236" width="136" height="48" rx="16" fill="none" stroke="#4f46e5" stroke-width="16"/>
+  <!-- briefcase center line -->
+  <rect x="128" y="348" width="256" height="12" rx="6" fill="#6366f1"/>
+  <!-- briefcase latch -->
+  <rect x="232" y="334" width="48" height="34" rx="8" fill="#818cf8"/>
+  <!-- AI spark lines -->
+  <line x1="256" y1="148" x2="256" y2="210" stroke="#a5f3fc" stroke-width="8" stroke-linecap="round"/>
+  <line x1="192" y1="168" x2="218" y2="196" stroke="#a5f3fc" stroke-width="7" stroke-linecap="round"/>
+  <line x1="320" y1="168" x2="294" y2="196" stroke="#a5f3fc" stroke-width="7" stroke-linecap="round"/>
+  <!-- AI dot -->
+  <circle cx="256" cy="128" r="36" fill="#22d3ee"/>
+  <circle cx="256" cy="128" r="20" fill="#0ea5e9"/>
+</svg>
