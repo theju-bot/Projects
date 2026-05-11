@@ -7,13 +7,16 @@ import {
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
-  PointerSensor,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
 import {
   SortableContext,
   horizontalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable'
 import { useColumns } from '@/hooks/useColumns'
 import { useJobs, useMoveJob } from '@/hooks/useJobs'
@@ -24,11 +27,13 @@ import { JobCard } from '@/components/board/JobCard'
 import { AddColumnButton } from '@/components/board/AddColumnButton'
 import type { Job } from '@/types/job.types'
 
+const EMPTY_JOBS: Job[] = []
+
 export function KanbanBoard() {
   const searchQuery = useAppSelector(selectSearchQuery)
 
   const { data: columns = [], isLoading: columnsLoading } = useColumns()
-  const { data: jobs = [], isLoading: jobsLoading } = useJobs()
+  const { data: jobs = EMPTY_JOBS, isLoading: jobsLoading } = useJobs()
   const { mutate: moveJob } = useMoveJob()
 
   const [activeJob, setActiveJob] = useState<Job | null>(null)
@@ -43,8 +48,17 @@ export function KanbanBoard() {
   }, [jobs])
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     }),
   )
 

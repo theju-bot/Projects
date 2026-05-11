@@ -40,7 +40,7 @@ export function JobCard({ job, isDragging = false }: Props) {
       {...attributes}
       {...listeners}
       className={cn(
-        'cursor-grab active:cursor-grabbing select-none',
+        'cursor-grab active:cursor-grabbing select-none touch-none',
         (isDragging || isSortableDragging) && 'opacity-50',
       )}
     >

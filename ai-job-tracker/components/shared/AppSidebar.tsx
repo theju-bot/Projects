@@ -14,6 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { authClient } from '@/lib/auth/auth-client'
 import { useRouter } from 'next/navigation'
@@ -28,8 +29,10 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { data: session } = authClient.useSession()
+  const { setOpenMobile } = useSidebar()
 
   async function handleSignOut() {
+    setOpenMobile(false)
     await authClient.signOut()
     router.push('/login')
   }
@@ -54,7 +57,7 @@ export function AppSidebar() {
                     isActive={pathname === href}
                     tooltip={label}
                   >
-                    <Link href={href}>
+                    <Link href={href} onClick={() => setOpenMobile(false)}>
                       <Icon size={18} />
                       <span>{label}</span>
                     </Link>
