@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Register | Job Applications Tracker',
+  title: 'Register | AI Job Trackerv',
   description: 'Register to create an account',
 }
 

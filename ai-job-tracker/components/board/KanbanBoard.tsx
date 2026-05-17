@@ -127,7 +127,7 @@ export function KanbanBoard() {
     const originalJob = jobs.find((j) => j._id === activeJobId)
     const isSameColumn = (originalJob ?? draggedJob).columnId === targetColumnId
 
-    if (activeJobId === overId && isSameColumn) {
+    if (activeJobId === overId) {
       setLocalJobs(jobs)
       return
     }

@@ -3,35 +3,45 @@ import { toast } from 'sonner'
 import { logClientError } from '@/lib/logClient'
 import type { SaveApiKeyInput } from '@/types/user.types'
 
-const SETTINGS_KEY = ['settings', 'openRouterKey']
+const SETTINGS_KEY = ['settings']
+
+async function isOpenRouterKey(): Promise<boolean> {
+  const res = await fetch('/api/user/settings')
+  if (!res.ok) throw new Error('Failed to fetch key status')
+  const data = await res.json()
+  return data.hasKey === true
+}
+
+async function saveOpenRouterKey(input: SaveApiKeyInput) {
+  const res = await fetch('/api/user/settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  })
+  const data = await res.json()
+  if (!data.success) throw new Error(data.message)
+  return data
+}
+
+async function deleteOpenRouterKey(): Promise<void> {
+  const res = await fetch('/api/user/settings', { method: 'DELETE' })
+  const data = await res.json()
+  if (!data.success) throw new Error(data.message)
+}
 
 export function useOpenRouterKey() {
   return useQuery({
     queryKey: SETTINGS_KEY,
-    queryFn: async () => {
-      const res = await fetch('/api/user/settings')
-      if (!res.ok) throw new Error('Failed to fetch key status')
-      const data = await res.json()
-      return data.hasKey as boolean
-    },
+    queryFn: isOpenRouterKey,
   })
 }
 
 export function useSaveOpenRouterKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (input: SaveApiKeyInput) => {
-      const res = await fetch('/api/user/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      })
-      const data = await res.json()
-      if (!data.success) throw new Error(data.message)
-      return data
-    },
+    mutationFn: (input: SaveApiKeyInput) => saveOpenRouterKey(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SETTINGS_KEY })
       toast.success('API key saved')
@@ -46,14 +56,7 @@ export function useSaveOpenRouterKey() {
 export function useDeleteOpenRouterKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/user/settings', {
-        method: 'DELETE',
-      })
-      const data = await res.json()
-      if (!data.success) throw new Error(data.message)
-      return data
-    },
+    mutationFn: deleteOpenRouterKey,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SETTINGS_KEY })
       toast.success('API key removed')

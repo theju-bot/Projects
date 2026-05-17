@@ -21,7 +21,12 @@ export function withErrorHandler(handler: RouteHandler) {
       const errorResponse = handleApiError(err)
 
       logger.error(method, path, errorResponse.status, duration, {
-        code: err instanceof AppError ? err.code : err instanceof ZodError ? 'VALIDATION_ERROR' : undefined,
+        code:
+          err instanceof AppError
+            ? err.code
+            : err instanceof ZodError
+              ? 'VALIDATION_ERROR'
+              : undefined,
         message: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
       })

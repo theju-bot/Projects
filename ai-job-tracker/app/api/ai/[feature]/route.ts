@@ -26,8 +26,8 @@ const promptBuilders: Record<string, (ctx: FullPromptContext) => string> = {
 export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
   const session = await requireSession(req)
 
-  const { feature: rawFeature } = await ctx.params
-  const featureParsed = aiFeatureSchema.safeParse(rawFeature)
+  const { feature } = await ctx.params
+  const featureParsed = aiFeatureSchema.safeParse(feature)
 
   if (!featureParsed.success) {
     throw new AppError('Invalid AI feature', 400, 'VALIDATION_ERROR')

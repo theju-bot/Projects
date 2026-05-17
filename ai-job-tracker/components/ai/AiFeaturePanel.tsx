@@ -13,22 +13,7 @@ type AiAction = {
   label: string
 }
 
-const COLUMN_FEATURES: Record<string, AiAction[]> = {
-  Saved: [{ id: 'gap-analysis', label: 'Analyze Fit' }],
-  Applying: [
-    { id: 'cover-letter', label: 'Cover Letter' },
-    { id: 'cold-email', label: 'Cold Email' },
-  ],
-  Applied: [
-    { id: 'cover-letter', label: 'Cover Letter' },
-    { id: 'follow-up', label: 'Follow Up Email' },
-  ],
-  Interview: [{ id: 'interview-prep', label: 'Interview Prep' }],
-  Offer: [{ id: 'cover-letter', label: 'Cover Letter' }],
-  Rejected: [{ id: 'rejection-analysis', label: 'Rejection Analysis' }],
-}
-
-const DEFAULT_FEATURES: AiAction[] = [
+const ALL_FEATURES: AiAction[] = [
   { id: 'cover-letter', label: 'Cover Letter' },
   { id: 'gap-analysis', label: 'Analyze Fit' },
   { id: 'cold-email', label: 'Cold Email' },
@@ -36,6 +21,15 @@ const DEFAULT_FEATURES: AiAction[] = [
   { id: 'interview-prep', label: 'Interview Prep' },
   { id: 'rejection-analysis', label: 'Rejection Analysis' },
 ]
+
+const COLUMN_FEATURES: Record<string, AiFeature[]> = {
+  Saved: ['gap-analysis'],
+  Applying: ['cover-letter'],
+  Applied: ['follow-up'],
+  Interview: ['interview-prep'],
+  Offer: ['cover-letter'],
+  Rejected: ['rejection-analysis'],
+}
 
 type Props = {
   jobId: string
@@ -50,9 +44,11 @@ export function AiFeaturePanel({ jobId, onResult }: Props) {
   const { mutate: runFeature } = useAiFeature(activeFeature ?? 'cover-letter')
 
   const column = columns.find((c) => c._id === job?.columnId)
-  const features = column
-    ? (COLUMN_FEATURES[column.name] ?? DEFAULT_FEATURES)
-    : DEFAULT_FEATURES
+  const features = (
+    COLUMN_FEATURES[column?.name ?? '']?.map(
+      (id) => ALL_FEATURES.find((f) => f.id === id)!,
+    ) ?? ALL_FEATURES
+  ).filter(Boolean)
 
   function handleRun(action: AiAction) {
     setActiveFeature(action.id)
@@ -72,8 +68,8 @@ export function AiFeaturePanel({ jobId, onResult }: Props) {
   return (
     <div className='flex flex-col gap-2'>
       <p className='text-sm text-muted-foreground mb-1'>
-        AI Actions for&nbsp;{' '}
-        <span className='font-medium text-foreground'>{job.title}</span>
+        AI Actions for&nbsp;
+        <span className='font-medium text-foreground'>{job.title}</span>&nbsp;
         <span className='font-medium text-foreground'>{job.company}</span>
       </p>
 
