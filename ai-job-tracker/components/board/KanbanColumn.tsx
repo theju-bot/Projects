@@ -35,7 +35,7 @@ export function KanbanColumn({ column, jobs }: Props) {
   }
 
   return (
-    <div className='flex flex-col w-80 shrink-0 rounded-lg bg-muted/50 p-3 gap-3'>
+    <div className='flex flex-col w-80 shrink-0 rounded-lg bg-muted/50 p-3 gap-3 max-h-full'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2 flex-1'>
           <div
@@ -85,7 +85,7 @@ export function KanbanColumn({ column, jobs }: Props) {
         </div>
       </div>
 
-      <div ref={setNodeRef} className='flex flex-col gap-2 min-h-20 flex-1'>
+      <div ref={setNodeRef} className='flex flex-col gap-2 min-h-20 flex-1 overflow-y-auto touch-pan-y overscroll-contain scrollbar-hover-only'>
         <SortableContext
           items={jobs.map((j) => j._id)}
           strategy={verticalListSortingStrategy}

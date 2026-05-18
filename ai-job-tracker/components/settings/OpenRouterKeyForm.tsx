@@ -9,6 +9,7 @@ import type { SaveApiKeyInput } from '@/types/user.types'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 import {
   useOpenRouterKey,
@@ -43,8 +44,6 @@ export function OpenRouterKeyForm() {
   }
 
   async function handleRemove() {
-    if (!confirm('Remove your OpenRouter key?')) return
-
     try {
       await removeKey()
     } catch (error) {}
@@ -62,13 +61,17 @@ export function OpenRouterKeyForm() {
         <p className='text-sm text-muted-foreground'>
           API key is configured. AI features are enabled.
         </p>
-        <Button
-          variant='destructive'
-          onClick={handleRemove}
-          disabled={isPending}
-        >
-          {isRemoving ? 'Removing...' : 'Remove Key'}
-        </Button>
+        <ConfirmDialog
+          trigger={
+            <Button variant='destructive' disabled={isPending}>
+              {isRemoving ? 'Removing...' : 'Remove Key'}
+            </Button>
+          }
+          title='Remove OpenRouter Key?'
+          description='This will remove your API key. AI features will be disabled until you add a new one.'
+          confirmLabel='Remove Key'
+          onConfirm={handleRemove}
+        />
       </div>
     )
   }

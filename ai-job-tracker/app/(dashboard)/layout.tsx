@@ -24,9 +24,9 @@ export default function DashboardLayout({
     <TooltipProvider>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className='min-w-0'>
           <Navbar />
-          <main className='flex-1 overflow-auto p-6'>{children}</main>
+          <main className='flex-1 overflow-auto p-6 min-w-0'>{children}</main>
         </SidebarInset>
       </SidebarProvider>
       <AddJobModal />

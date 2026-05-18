@@ -31,6 +31,7 @@ export function JobCard({ job, isDragging = false }: Props) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    touchAction: 'pan-x pan-y',
   }
 
   return (
@@ -40,7 +41,7 @@ export function JobCard({ job, isDragging = false }: Props) {
       {...attributes}
       {...listeners}
       className={cn(
-        'cursor-grab active:cursor-grabbing select-none touch-none',
+        'cursor-grab active:cursor-grabbing select-none',
         (isDragging || isSortableDragging) && 'opacity-50',
       )}
     >
@@ -58,7 +59,7 @@ export function JobCard({ job, isDragging = false }: Props) {
 
             <div className='flex items-center gap-1 text-xs text-muted-foreground'>
               <Building2 size={11} />
-              <span className='truncate'></span>
+              <span className='truncate'>{job.company}</span>
             </div>
           </div>
 

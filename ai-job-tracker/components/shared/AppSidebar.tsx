@@ -2,7 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Settings, BarChart2, LogOut, User } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Settings,
+  BarChart2,
+  LogOut,
+  User,
+} from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +20,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
 import { authClient } from '@/lib/auth/auth-client'
@@ -40,9 +47,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader className='border-b p-4'>
-        <span className='font-bold text-lg tracking-tight group-data-[collapsible=icon]:hidden'>
-          Job Tracker
-        </span>
+        <div className='flex items-center justify-between'>
+          <span className='font-bold text-lg tracking-tight group-data-[collapsible=icon]:hidden'>
+            Job Tracker
+          </span>
+          <SidebarTrigger />
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
@@ -73,9 +83,14 @@ export function AppSidebar() {
         <SidebarMenu>
           {session?.user && (
             <SidebarMenuItem>
-              <SidebarMenuButton className='cursor-default hover:bg-transparent hover:text-current' tooltip={session.user.name}>
+              <SidebarMenuButton
+                className='cursor-default hover:bg-transparent hover:text-current'
+                tooltip={session.user.name}
+              >
                 <User size={18} />
-                <span className='truncate font-medium'>{session.user.name}</span>
+                <span className='truncate font-medium'>
+                  {session.user.name}
+                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}

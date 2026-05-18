@@ -41,31 +41,14 @@ export default function AnalyticsPage() {
 
   const totalJobs = jobs.length
 
-  const appliedColumn = columns.find((c) =>
-    c.name.toLowerCase().includes('applied'),
-  )
-  const interviewColumn = columns.find((c) =>
-    c.name.toLowerCase().includes('interview'),
-  )
-  const offerColumn = columns.find((c) =>
-    c.name.toLowerCase().includes('offer'),
-  )
-  const rejectColumn = columns.find((c) =>
-    c.name.toLowerCase().includes('reject'),
-  )
+  const getCount = (columnName: string) =>
+    jobsByColumn.find((c) => c.name.toLowerCase().includes(columnName))
+      ?.count ?? 0
 
-  const appliedCount = appliedColumn
-    ? jobs.filter((j) => j.columnId === appliedColumn._id).length
-    : 0
-  const interviewCount = interviewColumn
-    ? jobs.filter((j) => j.columnId === interviewColumn._id).length
-    : 0
-  const offerCount = offerColumn
-    ? jobs.filter((j) => j.columnId === offerColumn._id).length
-    : 0
-  const rejectedCount = rejectColumn
-    ? jobs.filter((j) => j.columnId === rejectColumn._id).length
-    : 0
+  const appliedCount = getCount('applied')
+  const interviewCount = getCount('interview')
+  const offerCount = getCount('offer')
+  const rejectedCount = getCount('reject')
 
   const responseRate =
     appliedCount > 0 ? Math.round((interviewCount / appliedCount) * 100) : 0
@@ -79,13 +62,13 @@ export default function AnalyticsPage() {
     { label: 'Response Rate', value: `${responseRate}%` },
   ]
 
-  const pieData = jobsByColumn.filter((c) => c.count > 0).map((c) => ({ ...c, fill: c.color }))
+  const pieData = jobsByColumn.filter((c) => c.count > 0)
 
   const funnelData = [
     { stage: 'Total Tracked', count: totalJobs, fill: '#6366f1' },
-    { stage: 'Applied', count: appliedCount, fill: '#6366f1' },
-    { stage: 'Interview', count: interviewCount, fill: '#6366f1' },
-    { stage: 'Offer', count: offerCount, fill: '#6366f1' },
+    { stage: 'Applied', count: appliedCount, fill: '#818cf8' },
+    { stage: 'Interview', count: interviewCount, fill: '#f59e0b' },
+    { stage: 'Offer', count: offerCount, fill: '#10b981' },
   ]
 
   return (
@@ -134,7 +117,7 @@ export default function AnalyticsPage() {
                   <Tooltip
                     contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
                   />
-                  <Bar dataKey='count' radius={[4, 4, 0, 0]} />
+                  <Bar dataKey='count' radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -170,7 +153,9 @@ export default function AnalyticsPage() {
                       <span style={{ fontSize: '12px' }}>{value}</span>
                     )}
                   />
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -190,7 +175,7 @@ export default function AnalyticsPage() {
               <BarChart
                 layout='vertical'
                 data={funnelData}
-                margin={{ top: 4, right: 20, left: 60, bottom: 4 }}
+                margin={{ top: 4, right: 20, left: 40, bottom: 4 }}
               >
                 <XAxis
                   type='number'
@@ -206,7 +191,9 @@ export default function AnalyticsPage() {
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                />
                 <Bar dataKey='count' radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>

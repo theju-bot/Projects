@@ -37,7 +37,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>OpenRouter API Key</CardTitle>
           <CardDescription>
-            Add your OpenRouter key to unlock AI features. Get one at{' '}
+            Add your OpenRouter key to unlock AI features. Get one at&nbsp;
             <a
               href='https://openrouter.ai'
               target='_blank'

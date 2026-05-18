@@ -1,7 +1,6 @@
 'use client'
 
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Separator } from '@/components/ui/separator'
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { ModeToggle } from '@/components/shared/ModeToggle'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setSearchQuery } from '@/store/slices/uiSlice'
@@ -12,11 +11,11 @@ import { Search } from 'lucide-react'
 export function Navbar() {
   const dispatch = useAppDispatch()
   const searchQuery = useAppSelector(selectSearchQuery)
+  const { isMobile } = useSidebar()
 
   return (
     <header className='flex h-16 items-center border-b bg-background px-4 gap-4 sticky top-0 z-10'>
-      <SidebarTrigger />
-      <Separator orientation='vertical' className='h-16' />
+      {isMobile && <SidebarTrigger />}
 
       <div className='relative ml-auto max-w-md'>
         <Search

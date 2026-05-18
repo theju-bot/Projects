@@ -128,3 +128,33 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  .scrollbar-hover-only {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s ease;
+  }
+  
+  .scrollbar-hover-only:hover {
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .scrollbar-hover-only::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-hover-only::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-hover-only::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-hover-only:hover::-webkit-scrollbar-thumb {
+    background: var(--border);
+  }
+}
