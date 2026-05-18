@@ -84,7 +84,7 @@ export function KanbanBoard() {
     if (isMoving) return
     isDraggingRef.current = true
     const job = localJobs.find((j) => j._id === event.active.id)
-    if (job) setActiveJob(job)
+    job ? setActiveJob(job) : null
   }
 
   function onDragOver(event: DragOverEvent) {
@@ -127,7 +127,7 @@ export function KanbanBoard() {
     const originalJob = jobs.find((j) => j._id === activeJobId)
     const isSameColumn = (originalJob ?? draggedJob).columnId === targetColumnId
 
-    if (activeJobId === overId) {
+    if (activeJobId === overId && isSameColumn) {
       setLocalJobs(jobs)
       return
     }

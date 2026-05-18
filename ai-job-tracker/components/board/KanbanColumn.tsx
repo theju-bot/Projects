@@ -79,7 +79,7 @@ export function KanbanColumn({ column, jobs }: Props) {
               </Button>
             }
             title='Delete Column?'
-            description={`This will delete "${column.name}" and all its cards.`}
+            description={`This will delete "${column.name}" and all its jobs.`}
             onConfirm={() => deleteColumn(column._id)}
           />
         </div>

@@ -52,7 +52,7 @@ export function AddColumnButton() {
   return (
     <button
       onClick={() => setIsAdding(true)}
-      className='flex w-80 shrink-0 items-center gap-2 rounded-lg border-2 border-dashed border-border p-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors'
+      className='flex w-80 shrink-0 items-center gap-2 rounded-lg border-2 border-dashed border-border p-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer'
     >
       <Plus size={16} />
       Add column
