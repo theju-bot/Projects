@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/sidebar'
 import { authClient } from '@/lib/auth/auth-client'
 import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
 const links = [
   { href: '/dashboard', label: 'Board', icon: LayoutDashboard },
@@ -37,6 +38,8 @@ export function AppSidebar() {
   const router = useRouter()
   const { data: session } = authClient.useSession()
   const { setOpenMobile } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   async function handleSignOut() {
     setOpenMobile(false)
@@ -47,14 +50,19 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader className='border-b p-4'>
-        <div className='flex items-center justify-between'>
+        <div
+          className={cn(
+            'flex items-center',
+            isCollapsed ? 'justify-center' : 'justify-between',
+          )}
+        >
           <span className='font-bold text-lg tracking-tight group-data-[collapsible=icon]:hidden'>
             Job Tracker
           </span>
           <SidebarTrigger />
         </div>
       </SidebarHeader>
-
+      
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
@@ -78,7 +86,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className='border-t p-2'>
         <SidebarMenu>
           {session?.user && (
