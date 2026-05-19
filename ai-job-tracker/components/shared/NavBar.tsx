@@ -18,21 +18,21 @@ export function Navbar() {
   return (
     <header className='flex h-16 items-center border-b bg-background px-4 gap-4 sticky top-0 z-10'>
       {isMobile && <SidebarTrigger />}
-      {pathname === '/dashboard' && (
-        <div className='relative ml-auto max-w-md'>
-          <Search
-            size={14}
-            className='absolute left-3 top-1/2 -translate-y-1/2  text-muted-foreground '
-          />
-          <Input
-            placeholder='Search jobs...'
-            className='pl-8 h-8'
-            value={searchQuery}
-            onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-          />
-        </div>
-      )}
-      <div className='ml-auto'>
+      <div className='ml-auto flex items-center gap-4'>
+        {pathname === '/dashboard' && (
+          <div className='relative'>
+            <Search
+              size={14}
+              className='absolute left-3 top-1/2 -translate-y-1/2  text-muted-foreground '
+            />
+            <Input
+              placeholder='Search jobs...'
+              className='pl-8 h-8 w-64'
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+            />
+          </div>
+        )}
         <ModeToggle />
       </div>
     </header>
