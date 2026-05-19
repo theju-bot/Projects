@@ -15,8 +15,31 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'AI Job Traacker',
-  description: 'AI Powerd App that tracks job Applications',
+  title: 'AI Job Tracker',
+  description: 'AI Powered App that tracks job applications',
+  authors: [{ name: 'Thesigan' }],
+  keywords: ['Job Tracker', 'AI', 'Career', 'Job Search', 'Productivity'],
+  openGraph: {
+    title: 'AI Job Tracker',
+    description: 'AI Powered App that tracks job applications',
+    url: 'https://ai-job-tracker-lemon.vercel.app/',
+    siteName: 'AI Job Tracker',
+    images: [
+      {
+        url: 'https://ai-job-tracker-lemon.vercel.app/icon.jpg', 
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI Job Tracker',
+    description: 'AI Powered App that tracks job applications',
+    images: ['https://ai-job-tracker-lemon.vercel.app/icon.jpg'], 
+  },
 }
 
 export default function RootLayout({
