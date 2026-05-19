@@ -203,7 +203,7 @@ export function KanbanBoard() {
       onDragEnd={onDragEnd}
     >
       <div
-        className={`flex gap-4 h-full overflow-x-auto pb-4 transition-opacity ${
+        className={`flex gap-4 h-full overflow-x-auto pb-4 transition-opacity scrollbar-hover-only ${
           isMoving ? 'pointer-events-none cursor-not-allowed opacity-70' : ''
         }`}
       >

@@ -59,7 +59,7 @@ export function AppSidebar() {
           <span className='font-bold text-lg tracking-tight group-data-[collapsible=icon]:hidden'>
             Job Tracker
           </span>
-          <SidebarTrigger />
+          <SidebarTrigger/>
         </div>
       </SidebarHeader>
       

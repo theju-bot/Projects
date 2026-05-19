@@ -85,7 +85,7 @@ export function KanbanColumn({ column, jobs }: Props) {
         </div>
       </div>
 
-      <div ref={setNodeRef} className='flex flex-col gap-2 min-h-20 flex-1 overflow-y-auto touch-pan-y overscroll-contain scrollbar-hover-only'>
+      <div ref={setNodeRef} className='flex flex-col gap-2 min-h-20 flex-1 overflow-y-auto overscroll-y-contain scrollbar-hover-only'>
         <SortableContext
           items={jobs.map((j) => j._id)}
           strategy={verticalListSortingStrategy}
