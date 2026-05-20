@@ -6,19 +6,13 @@ type AuthFixtures = {
 
 export const test = base.extend<AuthFixtures>({
   authenticatedPage: async ({ page }, use) => {
-    const res = await page.request.post('http://localhost:3000/api/test/session')
-    const { token } = await res.json()
+    await page.request.post('http://localhost:3000/api/test/seed')
 
-    await page.context().addCookies([
-      {
-        name: 'better-auth.session_token',
-        value: token,
-        domain: 'localhost',
-        path: '/',
-        httpOnly: true,
-        sameSite: 'Lax',
-      },
-    ])
+    await page.goto('/login')
+    await page.getByPlaceholder(/you@example.com/i).fill('playwright@test.com')
+    await page.getByPlaceholder('••••••••').fill('Playwright1')
+    await page.getByRole('button', { name: /sign in/i }).click()
+    await page.waitForURL(/\/dashboard/)
 
     await use(page)
   },
