@@ -33,3 +33,15 @@ test('navigates to login from register page', async ({ page }) => {
   await page.getByRole('link', { name: /sign in/i }).click()
   await expect(page).toHaveURL(/\/login/)
 })
+
+test('successfully registers and redirects to dashboard', async ({ page }) => {
+  await page.goto('/register')
+  await page.getByPlaceholder('Your Name').fill('New User')
+  await page.getByPlaceholder(/you@example.com/i).fill(`new-${Date.now()}@test.com`)
+  const passwords = page.getByPlaceholder('••••••••')
+  await passwords.first().fill('ValidPass1!')
+  await passwords.last().fill('ValidPass1!')
+  await page.getByRole('button', { name: /create account/i }).click()
+  await page.waitForURL(/\/dashboard/)
+  await expect(page.getByText('New User')).toBeVisible()
+})
