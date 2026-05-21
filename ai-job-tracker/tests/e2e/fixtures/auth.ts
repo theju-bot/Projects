@@ -7,6 +7,11 @@ type AuthFixtures = {
 export const test = base.extend<AuthFixtures>({
   authenticatedPage: async ({ page }, use) => {
     await page.request.post('http://localhost:3000/api/test/seed')
+    const seedResponse = await page.request.post('/api/test/seed')
+    if (!seedResponse.ok()) {
+      const body = await seedResponse.text()
+      throw new Error(`Seed failed (${seedResponse.status()}): ${body}`)
+    }
 
     await page.goto('/login')
     await page.getByPlaceholder(/you@example.com/i).fill('playwright@test.com')
