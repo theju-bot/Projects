@@ -1,156 +1,241 @@
 # AI Job Tracker
 
-AI Job Tracker is an advanced web application that empowers users to organize, visualize, and optimize their job search. Leveraging a Kanban board UI, analytics dashboards, and AI-powered tools, it brings structure and insights to the application process.
+A full-stack job application tracker built with Next.js. Organize opportunities on a drag-and-drop Kanban board, review pipeline analytics, and generate stage-aware career content with OpenRouter-powered AI—all behind per-user authentication and encrypted API key storage.
 
----
+**Author:** Thesigan  
+**Repository:** [github.com/theju-bot/Projects](https://github.com/theju-bot/Projects) (this app lives in the `ai-job-tracker/` directory)  
+**Live demo:** [ai-job-tracker-lemon.vercel.app](https://ai-job-tracker-lemon.vercel.app/)
 
-## ✨ Features
+## Overview
 
-- **Kanban Board:**  
-  Easily add, edit, and organize job applications by phases such as Applied, Interviewing, Offer, Rejected, etc. Drag and drop to move applications between stages.
+AI Job Tracker helps you manage an active job search in one place. Each account gets a personalized Kanban workflow with default stages (Saved, Applying, Applied, Interview, Offer, Rejected), full CRUD for jobs and columns, and AI assistants that adapt to where a role sits in your pipeline. Profile fields (target role, skills, experience, bio) feed into prompts so generated text reflects your background.
 
-- **AI Assistance:**  
-  Integrate with OpenRouter or OpenAI for:
-  - Resume/CV feedback
-  - Job description & requirements parsing
-  - Personalized application suggestions
-  - Automated form filling
+## Features
 
-- **Analytics Dashboard:**  
-  Track interview stats, offers, response rates, and visualize trends over time.
+### Kanban board
+- Drag-and-drop jobs between columns using [@dnd-kit](https://dndkit.com)
+- Reorder jobs within a column; changes persist via the API
+- Add, edit, and delete job cards (title, company, location, URL, salary, description, notes)
+- Rename, recolor, and remove columns; add custom columns
+- Search jobs by title or company from the dashboard navbar
 
-- **User Authentication:**  
-  Secure sign-up, login, token/session-based authentication.
+### Analytics
+- Summary stats: total jobs, applied, interviews, offers, rejected, response rate
+- Bar chart of jobs by pipeline stage
+- Pie chart of stage distribution
+- Horizontal funnel: tracked → applied → interview → offer
 
-- **Customizable Settings:**  
-  Light/dark mode, notification settings, AI provider selection, user profile editing.
+### AI assistance (OpenRouter)
+Per-job actions vary by column stage:
 
-- **Mobile-Friendly:**  
-  Responsive design for seamless use on desktop/tablet/mobile.
+| Stage | AI actions |
+|-------|------------|
+| Saved | Analyze fit (gap analysis) |
+| Applying | Cover letter |
+| Applied | Follow-up email |
+| Interview | Interview prep |
+| Offer | Cover letter |
+| Rejected | Rejection analysis |
 
----
+Additional prompts live under `lib/ai/prompts/`. Users supply their own OpenRouter API key in Settings; keys are encrypted at rest with AES.
 
-## 🔥 Demo
+### Authentication and security
+- Email/password and Google OAuth via [Better Auth](https://www.better-auth.com)
+- Session-based access to dashboard routes
+- Route protection in `proxy.ts` (redirects unauthenticated users to login)
+- New users receive default Kanban columns automatically on signup
 
-_Screenshots and video demos go here. Add your screenshots to `/public/` and link them as shown:_
+### Settings
+- Profile: target role, skills, years of experience, bio, preferred OpenRouter model
+- Encrypted OpenRouter API key management (save / remove)
+- Light and dark theme toggle
 
-```md
-![Kanban Board UI](public/screenshot-kanban.png)
-![Analytics Dashboard](public/screenshot-analytics.png)
-```
+## Tech stack
 
-<details>
-<summary>Click for animated demo</summary>
+| Layer | Technologies |
+|-------|----------------|
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS 4, shadcn/ui, Radix UI |
+| Data | MongoDB, Mongoose |
+| Auth | Better Auth (MongoDB adapter) |
+| Client state | Redux Toolkit, TanStack React Query |
+| Forms | React Hook Form, Zod |
+| Drag and drop | @dnd-kit/core, @dnd-kit/sortable |
+| Charts | Recharts |
+| AI | OpenRouter Chat Completions API |
+| E2E tests | Playwright |
 
-[![Watch video](public/demo-thumb.png)](link-to-demo-video)
-</details>
-
----
-
-## 🏗️ Technology Stack
-
-- **Frontend:** Next.js (React), TypeScript, CSS Modules
-- **Backend:** Next.js API routes, MongoDB (via Mongoose/Native)
-- **Authentication:** Custom implementation (see `lib/auth`)
-- **State Management:** React context/hooks, Zustand (if used)
-- **AI Providers:** OpenAI/OpenRouter (configurable)
-- **UI Components:** Custom, modular, and extensible
-
----
-
-## 📦 Directory Structure
+## Project structure
 
 ```text
-app/            # Next.js app routes, pages, API
-components/     # Modular and feature-specific UI components
-hooks/          # Custom React hooks (e.g., useSettings, useJobs)
-lib/            # Utilities, validation, DB, AI helpers
-models/         # Database models (e.g., Job, Column)
-store/          # State management config and slices
-types/          # TypeScript type definitions
-public/         # Static files (add images here)
-logs/           # (optional) Logs collection
+ai-job-tracker/
+├── app/
+│   ├── (auth)/              # Login and register
+│   ├── (dashboard)/         # Board, analytics, settings
+│   └── api/                 # REST API routes
+├── components/
+│   ├── board/               # Kanban board, columns, cards
+│   ├── jobs/                # Job forms and modals
+│   ├── ai/                  # AI action UI and output dialog
+│   ├── settings/            # Profile and API key forms
+│   ├── shared/              # Navbar, sidebar, theme toggle
+│   └── ui/                  # shadcn/ui primitives
+├── hooks/                   # React Query hooks (jobs, columns, AI, settings)
+├── lib/
+│   ├── ai/                  # OpenRouter client, prompts, context
+│   ├── auth/                # Better Auth server and client
+│   ├── db/                  # MongoDB connection
+│   ├── errors/              # AppError and API error handler
+│   └── validations/         # Zod schemas
+├── models/                  # Mongoose Job and Column schemas
+├── store/                   # Redux store and UI slice
+├── types/                   # Shared TypeScript types
+├── tests/                   # Playwright E2E specs
+└── proxy.ts                 # Auth redirects for protected routes
 ```
 
----
+## Getting started
 
-## ⚙️ Setup & Installation
+### Prerequisites
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/theju-bot/Projects.git
-   cd Projects/ai-job-tracker
-   ```
+- Node.js 20+
+- MongoDB instance (local or Atlas)
+- Google OAuth credentials (optional, for Google sign-in)
+- OpenRouter API key (per user, configured in the app after login)
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### Installation
 
-3. **Copy and set environment variables:**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and fill out:
+Clone the monorepo and enter the app directory:
 
-| Variable Name                 | Purpose                                     | Example Value                                   |
-|-------------------------------|---------------------------------------------|--------------------------------------------------|
-| `MONGODB_URI`                 | Connection string for your MongoDB          | `mongodb://localhost:27017/mydb`                |
-| `BETTER_AUTH_SECRET`          | Secret for auth session/token encryption    | `your-super-secret-key`                         |
-| `BETTER_AUTH_URL`             | URL of your BetterAuth service (internal)   | `http://localhost:4000`                         |
-| `NEXT_PUBLIC_BETTER_AUTH_URL` | Public BetterAuth service URL (frontend)    | `http://localhost:4000`                         |
-| `GOOGLE_CLIENT_ID`            | Google OAuth Client ID for login            | `123456789-xxxxx.apps.googleusercontent.com`    |
-| `GOOGLE_CLIENT_SECRET`        | Google OAuth Client Secret                  | `super-google-secret`                           |
-| `ENCRYPTION_KEY`              | Key for encryption routines                 | `16+ character string`                          |
+```bash
+git clone https://github.com/theju-bot/Projects.git
+cd Projects/ai-job-tracker
+npm install
+```
 
-> **ℹ️ All variables are mandatory — the app will not run or deploy without all of them defined correctly!**
+### Environment variables
 
+Create `.env.local` in the project root:
 
-4. **Run the application:**
-   ```bash
-   npm run dev
-   ```
+```bash
+# Database
+MONGODB_URI=mongodb://127.0.0.1:27017/ai-job-tracker
 
-   Visit [http://localhost:3000](http://localhost:3000) to start using the app.
+# Better Auth
+BETTER_AUTH_SECRET=your-random-secret-at-least-32-chars
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_AUTH_URL=http://localhost:3000
 
----
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 
-## 🪄 AI Features
+# Encrypts user OpenRouter keys at rest
+ENCRYPTION_KEY=your-encryption-passphrase-16-chars-min
 
-- **Configuration:**  
-  You can switch between AI providers or disable AI features in user settings (`components/settings`).
-- **Custom prompts:**  
-  Edit or extend AI prompt logic in `lib/ai/prompts/` as desired.
+# E2E tests only (see Testing)
+TEST_SECRET=local-dev-test-secret
+```
 
----
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `BETTER_AUTH_SECRET` | Yes | Secret for signing sessions and tokens |
+| `BETTER_AUTH_URL` | Yes | App base URL used by Better Auth (e.g. `http://localhost:3000`) |
+| `NEXT_PUBLIC_AUTH_URL` | Yes | Same base URL, exposed to the auth client |
+| `GOOGLE_CLIENT_ID` | For Google login | OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | For Google login | OAuth client secret |
+| `ENCRYPTION_KEY` | Yes | Passphrase for AES encryption of OpenRouter keys |
+| `TEST_SECRET` | For E2E only | Protects `/api/test/seed` during Playwright setup |
+| `TEST_USER_EMAIL` | Optional | Override default test user email |
+| `TEST_USER_PASSWORD` | Optional | Override default test user password |
+| `MONGODB_DB` | Optional | Database name override for test seeding |
 
-## 🤖 API Routes
+### Run locally
 
-All API endpoints are found in `app/api/`.  
-Key routes include:
+```bash
+npm run dev
+```
 
-- `/api/jobs/`: CRUD for job applications
-- `/api/ai/`: AI-powered suggestions and parsing
-- `/api/columns/`: Manage Kanban columns
-- `/api/auth/`: Authentication endpoints
-- `/api/user/`: User settings and profile management
-- `/api/log/`: (Optional) Application logs
+Open [http://localhost:3000](http://localhost:3000). The root path redirects to `/dashboard`.
 
----
+### Production build
 
-## 🛠️ Common Issues / FAQ
+```bash
+npm run build
+npm start
+```
 
-- **App won’t boot?**  
-  Double-check your environment variables in `.env`.
+## API reference
 
-- **Can’t connect to MongoDB?**  
-  Make sure your db is up and accessible from your network.
+All JSON routes require an authenticated session unless noted.
 
-- **AI features not working?**  
-  Ensure valid API keys for OpenRouter/OpenAI; check usage settings.
+| Method | Route | Description |
+|--------|-------|-------------|
+| `*` | `/api/auth/[...all]` | Better Auth handlers (login, register, OAuth, session) |
+| `GET` | `/api/jobs` | List jobs for the current user |
+| `POST` | `/api/jobs` | Create a job |
+| `GET` | `/api/jobs/[id]` | Get one job |
+| `PATCH` | `/api/jobs/[id]` | Update or move a job |
+| `DELETE` | `/api/jobs/[id]` | Delete a job |
+| `GET` | `/api/columns` | List columns |
+| `POST` | `/api/columns` | Create a column |
+| `PATCH` | `/api/columns/[id]` | Update a column |
+| `DELETE` | `/api/columns/[id]` | Delete a column |
+| `POST` | `/api/ai/[feature]` | Run an AI feature (`cover-letter`, `gap-analysis`, `cold-email`, `follow-up`, `interview-prep`, `rejection-analysis`) |
+| `GET` | `/api/user/settings` | Check whether an OpenRouter key is stored |
+| `POST` | `/api/user/settings` | Save encrypted OpenRouter key |
+| `DELETE` | `/api/user/settings` | Remove stored OpenRouter key |
+| `POST` | `/api/log` | Client-side log forwarding |
+| `POST` | `/api/test/seed` | Reset test user (E2E only; requires `x-test-secret` header) |
 
----
+## AI configuration
 
-## 📝 License
+1. Sign in and open **Settings**.
+2. Complete your profile so prompts include role, skills, and experience.
+3. Add an [OpenRouter](https://openrouter.ai) API key.
+4. Optionally set a preferred model (defaults to `operouter/free` if unset).
+5. Open a job card on the board and use the stage-appropriate AI actions.
 
-MIT
+Prompt templates are in `lib/ai/prompts/`. The OpenRouter client is in `lib/ai/openrouter.ts`.
+
+## Testing
+
+End-to-end tests use Playwright. Global setup seeds the database and saves an authenticated session to `playwright/.auth/user.json`.
+
+```bash
+# Ensure TEST_SECRET (and other env vars) are in .env.local
+npm run test:e2e
+npm run test:e2e:ui      # interactive UI mode
+npm run test:e2e:headed  # visible browser
+```
+
+Specs cover registration, auth flows, and authenticated dashboard/Kanban rendering.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run test:e2e` | Run Playwright tests |
+
+## Troubleshooting
+
+**Application fails to start**  
+Confirm `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_AUTH_URL`, and `ENCRYPTION_KEY` are set. `BETTER_AUTH_URL` must match the URL you use in the browser.
+
+**Cannot sign in with Google**  
+Verify `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, and that the OAuth redirect URI matches your Better Auth configuration.
+
+**AI actions return an error**  
+Add a valid OpenRouter key in Settings. Ensure `ENCRYPTION_KEY` has not changed after saving a key (changing it invalidates stored keys).
+
+**MongoDB connection errors**  
+Check that MongoDB is running and that the connection string includes the correct host, credentials, and database name.
+
+## License
+
+MIT — Copyright (c) 2026 Thesigan
