@@ -3,7 +3,6 @@ import type { AuthRequest } from '../middleware/verifyJWT.js'
 import mongoose from 'mongoose'
 import Event from '../models/Event.model.js'
 import Site from '../models/Site.model.js'
-import { count } from 'console'
 
 const verifySiteOwnership = async (
   siteId: string,
@@ -100,7 +99,7 @@ const getTrafficSources = async (
           count: { $sum: 1 },
         },
       },
-      { $sort: { $count: -1 } },
+      { $sort: { count: -1 } },
       { $limit: 10 },
       { $project: { _id: 0, referrer: '$_id', count: 1 } },
     ])
@@ -124,7 +123,7 @@ const getBrowserStats = async (
       { $match: { siteId: new mongoose.Types.ObjectId(siteId) } },
       {
         $group: {
-          _id: 'browser',
+          _id: '$browser',
           count: { $sum: 1 },
         },
       },
