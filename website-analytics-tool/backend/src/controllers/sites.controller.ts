@@ -51,10 +51,12 @@ const getSite = async (
       _id: req.params.id as string,
       userId: req.userId!,
     }).exec()
+
     if (!site) {
       res.status(404).json({ message: 'Site not found' })
       return
     }
+    
     res.status(200).json(site)
   } catch (err) {
     next(err)
@@ -96,10 +98,12 @@ const deleteSite = async (
       _id: req.params.id as string,
       userId: req.userId!,
     }).exec()
+
     if (!site) {
       res.status(404).json({ message: 'Site not found' })
       return
     }
+
     res.status(200).json({ message: 'Site deleted successfully' })
   } catch (err) {
     next(err)
