@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose'
 
-export interface IEvent extends Document {
+export interface WATEvent extends Document {
   siteId: mongoose.Types.ObjectId
   type: string
   path: string
@@ -10,7 +10,7 @@ export interface IEvent extends Document {
   country: string
 }
 
-const EventSchema = new Schema<IEvent>(
+const EventSchema = new Schema<WATEvent>(
   {
     siteId: {
       type: Schema.Types.ObjectId,
@@ -45,4 +45,4 @@ const EventSchema = new Schema<IEvent>(
   { timestamps: true },
 )
 
-export default mongoose.model<IEvent>('Event', EventSchema)
+export default mongoose.model<WATEvent>('Event', EventSchema)

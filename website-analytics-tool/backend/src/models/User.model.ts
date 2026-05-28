@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from 'mongoose'
 
-export interface IUser extends Document {
+export interface WATUser extends Document {
   email: string
   password: string
 }
 
-const UserSchema = new Schema<IUser>(
+const UserSchema = new Schema<WATUser>(
   {
     email: {
       type: String,
@@ -22,4 +22,4 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true },
 )
 
-export default mongoose.model<IUser>('User', UserSchema)
+export default mongoose.model<WATUser>('User', UserSchema)

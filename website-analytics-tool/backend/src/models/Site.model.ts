@@ -1,12 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose'
 
-export interface ISite extends Document {
+export interface WATSite extends Document {
   userId: mongoose.Types.ObjectId
   name: string
   domain: string
 }
 
-const SiteSchema = new Schema<ISite>(
+const SiteSchema = new Schema<WATSite>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -27,4 +27,4 @@ const SiteSchema = new Schema<ISite>(
   { timestamps: true },
 )
 
-export default mongoose.model<ISite>('Site', SiteSchema)
+export default mongoose.model<WATSite>('Site', SiteSchema)

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
 import User from '../models/User.model.js'
 
-export const register = async (
+const register = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -16,7 +16,7 @@ export const register = async (
       return
     }
 
-    const user = await User.findOne([email]).exec()
+    const user = await User.findOne({ email }).exec()
     if (user) {
       res.status(409).json({ message: 'Email already exists' })
       return
@@ -60,30 +60,37 @@ const login = async (
 
     const accessToken = jwt.sign(
       { userId: user._id },
-      process.env['ACCESS_TOKEN_SECRET'] as string,
-      { expiresIn: '15m' },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: '15m', issuer: 'theju' },
     )
 
     const refreshToken = jwt.sign(
       { userId: user._id },
-      process.env['REFRESH_TOKEN_SECRET'] as string,
-      { expiresIn: '7d' },
+      process.env.REFRESH_TOKEN_SECRET as string,
+      { expiresIn: '7d', issuer: 'theju' },
     )
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 15 * 60 * 1000,
+    })
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       sameSite: 'none',
-      secure: process.env['NODE_ENV'] === 'production',
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
-    res.status(200).json({ accessToken })
+    res.status(200).json({ message: 'Logged in successfully' })
   } catch (err) {
     next(err)
   }
 }
 
-export const refresh = async (
+const refresh = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -98,22 +105,29 @@ export const refresh = async (
 
     const decoded = jwt.verify(
       token,
-      process.env['REFRESH_TOKEN_SECRET'] as string,
+      process.env.REFRESH_TOKEN_SECRET as string,
     ) as { userId: string }
 
     const accessToken = jwt.sign(
       { userId: decoded.userId },
-      process.env['ACCESS_TOKEN_SECRET'] as string,
-      { expiresIn: '15m' },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: '15m', issuer: 'theju' },
     )
 
-    res.status(200).json({ accessToken })
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 15 * 60 * 1000,
+    })
+
+    res.status(200).json({ message: 'Token refreshed' })
   } catch (err) {
     next(err)
   }
 }
 
-export const logout = async (
+const logout = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -122,7 +136,7 @@ export const logout = async (
     res.clearCookie('refreshToken', {
       httpOnly: true,
       sameSite: 'none',
-      secure: process.env['NODE_ENV'] === 'production',
+      secure: process.env.NODE_ENV === 'production',
     })
 
     res.status(200).json({ message: 'Logged out successfully' })
@@ -130,3 +144,5 @@ export const logout = async (
     next(err)
   }
 }
+
+export { register, login, refresh, logout }
