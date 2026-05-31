@@ -1,4 +1,4 @@
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -30,6 +30,10 @@ const Login = () => {
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState('')
+
+  useEffect(() => {
+    document.title = 'Login — Analytics'
+  }, [])
 
   const {
     register,

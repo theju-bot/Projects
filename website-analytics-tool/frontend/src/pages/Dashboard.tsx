@@ -1,15 +1,8 @@
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
-import client from '../api/client'
-import type {
-  PageView,
-  TopPage,
-  TrafficSource,
-  BrowserStat,
-  OSStat,
-  CountryStat,
-} from '../types/types'
+import useAnalytics from '../hooks/useAnalytics'
+import { useAppSelector } from '../store/hooks'
+import { selectSelectedSite } from '../store/slices/sitesSlice'
+import { useEffect } from 'react'
 import {
   LineChart,
   Line,
@@ -24,6 +17,7 @@ import {
   Pie,
   Legend,
 } from 'recharts'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 
 const COLORS = [
   '#6366f1',
@@ -36,60 +30,13 @@ const COLORS = [
 
 const Dashboard = () => {
   const { siteId } = useParams<{ siteId: string }>()
+  const selectedSite = useAppSelector(selectSelectedSite)
+  const { pageViews, topPages, sources, browsers, osStats, countries } =
+    useAnalytics(siteId)
 
-  const { data: pageViews = [] } = useQuery<PageView[]>({
-    queryKey: ['pageviews', siteId],
-    queryFn: async () => {
-      const res = await client.get<PageView[]>(`/analytics/${siteId}/pageviews`)
-      return res.data
-    },
-  })
-
-  const { data: topPages = [] } = useQuery<TopPage[]>({
-    queryKey: ['toppages', siteId],
-    queryFn: async () => {
-      const res = await client.get<TopPage[]>(`/analytics/${siteId}/toppages`)
-      return res.data
-    },
-  })
-
-  const { data: sources = [] } = useQuery<TrafficSource[]>({
-    queryKey: ['sources', siteId],
-    queryFn: async () => {
-      const res = await client.get<TrafficSource[]>(
-        `/analytics/${siteId}/sources`,
-      )
-      return res.data
-    },
-  })
-
-  const { data: browsers = [] } = useQuery<BrowserStat[]>({
-    queryKey: ['browsers', siteId],
-    queryFn: async () => {
-      const res = await client.get<BrowserStat[]>(
-        `/analytics/${siteId}/browsers`,
-      )
-      return res.data
-    },
-  })
-
-  const { data: osStats = [] } = useQuery<OSStat[]>({
-    queryKey: ['os', siteId],
-    queryFn: async () => {
-      const res = await client.get<OSStat[]>(`/analytics/${siteId}/os`)
-      return res.data
-    },
-  })
-
-  const { data: countries = [] } = useQuery<CountryStat[]>({
-    queryKey: ['countries', siteId],
-    queryFn: async () => {
-      const res = await client.get<CountryStat[]>(
-        `/analytics/${siteId}/countries`,
-      )
-      return res.data
-    },
-  })
+  useEffect(() => {
+    document.title = 'Dashboard — Analytics'
+  }, [])
 
   const browsersWithColor = browsers.map((b, i) => ({
     ...b,
@@ -104,7 +51,10 @@ const Dashboard = () => {
   return (
     <div className='p-6 max-w-5xl mx-auto'>
       <h1 className='text-2xl font-bold mb-6'>Analytics Dashboard</h1>
-
+      <p className='text-muted-foreground text-sm mb-6'>
+        {selectedSite?.name ?? 'Dashboard'}
+        {selectedSite?.domain && <span> - {selectedSite?.domain}</span>}
+      </p>
       <Tabs defaultValue='pageviews'>
         <TabsList className='mb-4'>
           <TabsTrigger value='pageviews'>Page Views</TabsTrigger>

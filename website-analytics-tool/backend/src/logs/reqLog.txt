@@ -1,7 +1,3 @@
-31 May 2026	10:08:53	b2dee0db-a2c1-4c79-8249-9f0458455373	GET	http://localhost:5173	/api/analytics/6a1b8a29a2d0add991a9f4bc/os
-31 May 2026	10:08:53	691f1ff5-3572-447a-9974-a6c540e3b8d6	GET	http://localhost:5173	/api/analytics/6a1b8a29a2d0add991a9f4bc/countries
-31 May 2026	10:08:52	c163194a-fe16-45e0-9190-f44c7a9d4cc4	GET	http://localhost:5173	/api/analytics/6a1b8a29a2d0add991a9f4bc/browsers
-31 May 2026	10:08:51	a9509a6e-1d06-4e0d-a780-1c46c68d88cb	GET	http://localhost:5173	/api/sites
-31 May 2026	10:08:49	3178f17c-7be2-414a-9a5f-faf5fbba61dc	GET	http://localhost:5173	/api/analytics/6a1b8ae1a2d0add991a9f4bd/countries
-2026	10:08:49	89cc5a59-466f-48da-9a17-93520ace55a1	GET	http://localhost:5173	/api/analytics/6a1b8ae1a2d0add991a9f4bd/toppages
-
+31 May 2026	11:08:36	cb9bc26d-d9ed-4d96-a632-5cef46b7ed71	GET	http://localhost:5173	/api/sites
+31 May 2026	11:08:35	6545be33-ef0e-41e6-9c63-33c17e541b41	GET	http://localhost:5173	/api/analytics/6a1b8ae1a2d0add991a9f4bd/countries
+31 May 2026	11:08:35	313c8a45-0dbf-4280-901b-2f61321e5bff	GET	http://localhost:5173	/api/analytics/6a1b8ae1a2d0add991a9f4bd/sources

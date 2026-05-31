@@ -1,12 +1,11 @@
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import useSites from '../hooks/useSites'
 import { useAppDispatch } from '../store/hooks'
 import { setSelectedSite } from '../store/slices/sitesSlice'
-import client from '../api/client'
 import type { Site } from '../types/types'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -75,27 +74,15 @@ const getScript = (siteId: string) => `<script>
 const Sites = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState('')
 
-  const { data: sites = [], isLoading } = useQuery<Site[]>({
-    queryKey: ['sites'],
-    queryFn: async () => {
-      const res = await client.get<Site[]>('/sites')
-      return res.data
-    },
-  })
+  const { sites, isLoading, deleteMutation, createMutation } = useSites()
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await client.delete(`/sites/${id}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sites'] })
-    },
-  })
+  useEffect(() => {
+    document.title = 'Your Sites — Analytics'
+  }, [])
 
   const {
     register,
@@ -110,8 +97,7 @@ const Sites = () => {
   const onSubmit = (data: SiteForm) => {
     startTransition(async () => {
       try {
-        await client.post('/sites', data)
-        queryClient.invalidateQueries({ queryKey: ['sites'] })
+        await createMutation.mutateAsync(data)
         reset()
         setOpen(false)
       } catch (err) {

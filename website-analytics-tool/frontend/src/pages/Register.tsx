@@ -1,4 +1,4 @@
-import { useTransition } from 'react'
+import { useEffect, useTransition } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,6 +34,10 @@ const Register = () => {
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState('')
 
+  useEffect(() => {
+    document.title = 'Register — Analytics'
+  }, [])
+  
   const {
     register,
     handleSubmit,
