@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
 import User from '../models/User.model.js'
 
+const isProd = process.env.NODE_ENV !== 'development'
+
 const register = async (
   req: Request,
   res: Response,
@@ -72,15 +74,15 @@ const login = async (
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      sameSite: 'none',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
       maxAge: 15 * 60 * 1000,
     })
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      sameSite: 'none',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
@@ -116,8 +118,8 @@ const refresh = async (
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      sameSite: 'none',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
       maxAge: 15 * 60 * 1000,
     })
 
@@ -135,8 +137,8 @@ const logout = async (
   try {
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      sameSite: 'none',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
     })
 
     res.status(200).json({ message: 'Logged out successfully' })

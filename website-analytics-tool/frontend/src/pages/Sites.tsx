@@ -189,15 +189,18 @@ const Sites = () => {
                     Get Script
                   </Button>
                 </DialogTrigger>
-                <DialogContent onClick={(e) => e.stopPropagation()}>
+                <DialogContent
+                  onClick={(e) => e.stopPropagation()}
+                  className='flex flex-col gap-4 max-h-[80vh]'
+                >
                   <DialogHeader>
                     <DialogTitle>Tracking Script</DialogTitle>
                   </DialogHeader>
-                  <p className='text-sm text-muted-foreground mb-2'>
+                  <p className='text-sm text-muted-foreground'>
                     Paste this inside the <code>&lt;head&gt;</code> of your
                     website.
                   </p>
-                  <pre className='bg-muted text-sm rounded-md p-4 overflow-x-auto whitespace-pre-wrap break-all'>
+                  <pre className='bg-muted text-sm rounded-md p-4 overflow-y-auto flex-1 whitespace-pre-wrap break-all'>
                     {getScript(site._id)}
                   </pre>
                   <Button
@@ -208,7 +211,7 @@ const Sites = () => {
                   >
                     Copy Script
                   </Button>
-                </DialogContent>
+                </DialogContent>{' '}
               </Dialog>
 
               <Button
