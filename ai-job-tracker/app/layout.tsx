@@ -61,50 +61,50 @@ export default function RootLayout({
           strategy='afterInteractive'
           dangerouslySetInnerHTML={{
             __html: `(function () {
-            const SITE_ID = '6a204f6ad99a43781f049b9e'
-            const API_URL = 'https://theju.duckdns.org/api/events'
+                  const SITE_ID = '6a204f6ad99a43781f049b9e'
+                  const API_URL = 'https://theju.duckdns.org/api/events'
 
-            function getOS() {
-              if (navigator.userAgentData?.platform) return navigator.userAgentData.platform
-              const ua = navigator.userAgent
-              if (/Android/.test(ua)) return 'Android'
-              if (/iPhone|iPad|iPod/.test(ua)) return 'iOS'
-              if (/Windows/.test(ua)) return 'Windows'
-              if (/Mac/.test(ua)) return 'MacOS'
-              if (/Linux/.test(ua)) return 'Linux'
-              return 'Unknown'
-            }
+                  function getOS() {
+                    if (navigator.userAgentData?.platform) return navigator.userAgentData.platform
+                    const ua = navigator.userAgent
+                    if (/Android/.test(ua)) return 'Android'
+                    if (/iPhone|iPad|iPod/.test(ua)) return 'iOS'
+                    if (/Windows/.test(ua)) return 'Windows'
+                    if (/Mac/.test(ua)) return 'MacOS'
+                    if (/Linux/.test(ua)) return 'Linux'
+                    return 'Unknown'
+                  }
 
-            function getBrowser() {
-              if (navigator.userAgentData?.brands) {
-                const brands = navigator.userAgentData.brands
-                if (brands.some(function(b) { return /Edg/i.test(b.brand) })) return 'Edge'
-                if (brands.some(function(b) { return /Opera|OPR/i.test(b.brand) })) return 'Opera'
-                if (brands.some(function(b) { return /Chrome|Chromium/i.test(b.brand) })) return 'Chrome'
-                if (brands.some(function(b) { return /Firefox/i.test(b.brand) })) return 'Firefox'
-              }
-              const ua = navigator.userAgent
-              if (/Edg\\//.test(ua)) return 'Edge'
-              if (/OPR\\/|Opera/.test(ua)) return 'Opera'
-              if (/Firefox\\//.test(ua)) return 'Firefox'
-              if (/Chrome\\//.test(ua) && !/Chromium/.test(ua)) return 'Chrome'
-              if (/Chromium\\//.test(ua)) return 'Chromium'
-              if (/Safari\\//.test(ua) && !/Chrome/.test(ua)) return 'Safari'
-              return 'Unknown'
-            }
+                  function getBrowser() {
+                    if (navigator.userAgentData?.brands) {
+                      const brands = navigator.userAgentData.brands
+                      if (brands.some(function(b) { return /Edg/i.test(b.brand) })) return 'Edge'
+                      if (brands.some(function(b) { return /Opera|OPR/i.test(b.brand) })) return 'Opera'
+                      if (brands.some(function(b) { return /Chrome|Chromium/i.test(b.brand) })) return 'Chrome'
+                      if (brands.some(function(b) { return /Firefox/i.test(b.brand) })) return 'Firefox'
+                    }
+                    const ua = navigator.userAgent
+                    if (/Edg\\//.test(ua)) return 'Edge'
+                    if (/OPR\\/|Opera/.test(ua)) return 'Opera'
+                    if (/Firefox\\//.test(ua)) return 'Firefox'
+                    if (/Chrome\\//.test(ua) && !/Chromium/.test(ua)) return 'Chrome'
+                    if (/Chromium\\//.test(ua)) return 'Chromium'
+                    if (/Safari\\//.test(ua) && !/Chrome/.test(ua)) return 'Safari'
+                    return 'Unknown'
+                  }
 
-            fetch(API_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                siteId: SITE_ID,
-                type: 'pageview',
-                path: window.location.pathname,
-                referrer: document.referrer,
-                browser: getBrowser(),
-                os: getOS(),
-              }),
-            })
+                  fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      siteId: SITE_ID,
+                      type: 'pageview',
+                      path: window.location.pathname,
+                      referrer: document.referrer,
+                      browser: getBrowser(),
+                      os: getOS(),
+                    }),
+                  })
           })()`,
           }}
         />
