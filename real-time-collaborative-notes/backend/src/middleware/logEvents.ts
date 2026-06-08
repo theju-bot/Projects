@@ -9,7 +9,10 @@ import type { Request, Response, NextFunction } from 'express'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export const logEvents = async (message: string, logName: string): Promise<void> => {
+export const logEvents = async (
+  message: string,
+  logName: string,
+): Promise<void> => {
   const dateTime = dayjs().format('DD MMMM YYYY\tHH:mm:ss')
   const logItem = `${dateTime}\t${uuid()}\t${message}\n`
 
@@ -33,7 +36,11 @@ export const logEvents = async (message: string, logName: string): Promise<void>
   }
 }
 
-export const logger = (req: Request, res: Response, next: NextFunction): void => {
+export const logger = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   logEvents(`${req.method}\t${req.headers.origin}\t${req.url}`, 'reqLog.txt')
   console.log(`${req.method} ${req.path}`)
   next()

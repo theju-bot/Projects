@@ -16,7 +16,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use(logger)
 
-app.all('/api/auth/*', toNodeHandler(auth))
+app.all('/api/auth/*splat', toNodeHandler(auth))
 
 connectDB()
 
