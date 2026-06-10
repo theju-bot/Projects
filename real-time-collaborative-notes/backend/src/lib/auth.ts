@@ -4,9 +4,6 @@ import { mongoClient } from '../config/dbConn.js'
 
 export const auth = betterAuth({
   database: mongodbAdapter(mongoClient.db()),
-  emailAndPassword: {
-    enabled: true,
-  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -18,7 +15,7 @@ export const auth = betterAuth({
     },
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 2, 
+    expiresIn: 60 * 60 * 24 * 2,
     updateAge: 60 * 60,
   },
   trustedOrigins: [process.env.CLIENT_URL!],
