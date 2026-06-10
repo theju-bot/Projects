@@ -47,6 +47,12 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
     socket.on('disconnect', () => {
       if (currentDocId) {
         console.log(`Socket ${socket.id} left document ${currentDocId}`)
+
+        const room = io.sockets.adapter.rooms.get(currentDocId)
+        if (!room || room.size === 0) {
+          docs.delete(currentDocId)
+          console.log(`Cleaned up doc ${currentDocId} from memory`)
+        }
       }
     })
   })
