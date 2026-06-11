@@ -19,13 +19,8 @@ export const useSocket = (docId: string, ydoc: Y.Doc) => {
       Y.applyUpdate(ydoc, update, 'remote')
     })
 
-    socket.on('awareness', (awarenessUpdate: string) => {
-      // handle cursor/presence updates here
-    })
-
     const handleUpdate = (update: Uint8Array, origin: unknown) => {
       if (origin === 'remote') return
-      // const base64 = btoa(String.fromCharCode(...update))
       let binary = ''
       update.forEach((b) => (binary += String.fromCharCode(b)))
       const base64 = btoa(binary)
