@@ -23,11 +23,12 @@ export default function Editor() {
   const [title, setTitle] = useState('')
   const [showShare, setShowShare] = useState(false)
   const titleDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const contentDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const hydrated = useRef(false)
 
-  const ydoc = useMemo(() => new Y.Doc(), [id])
-
+  const ydoc = useMemo(() => {
+    const doc = new Y.Doc()
+    return doc
+  }, [id])
+  
   const { synced } = useSocket(id!, ydoc, {
     id: session?.user.id ?? '',
     name: session?.user.name ?? 'Anonymous',
@@ -45,24 +46,15 @@ export default function Editor() {
           'prose prose-invert max-w-none focus:outline-none min-h-[calc(100vh-120px)] px-8 py-6',
       },
     },
-    onUpdate: ({ editor }) => {
-      if (!id || !hydrated.current) return
-      if (contentDebounce.current) clearTimeout(contentDebounce.current)
-      contentDebounce.current = setTimeout(() => {
-        updateDocument({ id, data: { content: editor.getHTML() } })
-      }, 2000)
-    },
   })
 
   useEffect(() => {
     if (doc) setTitle(doc.title)
-    if (!editor || !doc?.content || !synced || hydrated.current) return
+  }, [doc])
 
-    if (editor.isEmpty) {
-      editor.commands.setContent(doc.content)
-    }
-    hydrated.current = true
-  }, [editor, doc, synced])
+  useEffect(() => {
+    return () => ydoc.destroy()
+  }, [ydoc])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)

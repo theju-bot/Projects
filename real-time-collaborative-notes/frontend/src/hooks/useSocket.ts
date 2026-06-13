@@ -13,7 +13,7 @@ export const useSocket = (
     setSynced(false)
 
     const emitJoinAndAwareness = () => {
-      socket.emit('join-document', docId)
+      socket.emit('join-document', docId, user.id)
 
       const colors = [
         '#f87171',
@@ -55,6 +55,10 @@ export const useSocket = (
       Y.applyUpdate(ydoc, update, 'remote')
     })
 
+    socket.on('join-error', (msg: string) => {
+      console.error('Join error:', msg)
+    })
+
     const handleUpdate = (update: Uint8Array, origin: unknown) => {
       if (origin === 'remote') return
       let binary = ''
@@ -70,6 +74,7 @@ export const useSocket = (
       socket.off('connect', emitJoinAndAwareness)
       socket.off('sync')
       socket.off('update')
+      socket.off('join-error')
       ydoc.off('update', handleUpdate)
       socket.disconnect()
     }

@@ -9,6 +9,11 @@ const generateInvite = async (req: Request, res: Response): Promise<void> => {
     res.status(404).json({ error: 'Not found' })
     return
   }
+  if (doc.collaborators.length >= 3) {
+    res.status(403).json({ error: 'Collaborator limit reached' })
+    return
+  }
+
   if (doc.ownerId !== req.user.id) {
     res.status(403).json({ error: 'Forbidden' })
     return

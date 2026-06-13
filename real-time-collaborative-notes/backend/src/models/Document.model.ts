@@ -2,7 +2,7 @@ import mongoose, { type Document as MongoDocument, Schema } from 'mongoose'
 
 export interface RTCNDocument extends MongoDocument {
   title: string
-  content: string
+  content: Buffer | null
   ownerId: string
   collaborators: string[]
 }
@@ -14,8 +14,8 @@ const DocumentSchema = new Schema<RTCNDocument>(
       default: 'Untitled',
     },
     content: {
-      type: String,
-      default: '',
+      type: Buffer,
+      default: null,
     },
     ownerId: {
       type: String,
