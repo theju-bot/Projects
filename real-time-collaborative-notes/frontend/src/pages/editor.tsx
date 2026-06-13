@@ -10,6 +10,8 @@ import authClient from '../lib/authClient'
 import Toolbar from '../components/editor/Toolbar'
 import CollaboratorAvatars from '../components/editor/CollaboratorAvatars'
 import ShareModal from '../components/editor/ShareModal'
+import { LuArrowLeft } from 'react-icons/lu'
+import { RiShareBoxLine } from 'react-icons/ri'
 
 export default function Editor() {
   const { id } = useParams<{ id: string }>()
@@ -22,10 +24,15 @@ export default function Editor() {
   const [showShare, setShowShare] = useState(false)
   const titleDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const contentDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hydrated = useRef(false)
 
   const ydoc = useMemo(() => new Y.Doc(), [id])
 
-  useSocket(id!, ydoc)
+  const { synced } = useSocket(id!, ydoc, {
+    id: session?.user.id ?? '',
+    name: session?.user.name ?? 'Anonymous',
+    image: session?.user.image ?? undefined,
+  })
 
   const editor = useEditor({
     extensions: [
@@ -39,21 +46,23 @@ export default function Editor() {
       },
     },
     onUpdate: ({ editor }) => {
-      if (!id) return
+      if (!id || !hydrated.current) return
       if (contentDebounce.current) clearTimeout(contentDebounce.current)
       contentDebounce.current = setTimeout(() => {
         updateDocument({ id, data: { content: editor.getHTML() } })
-      }, 1000)
+      }, 2000)
     },
   })
 
   useEffect(() => {
     if (doc) setTitle(doc.title)
-    if (!editor || !doc?.content) return
+    if (!editor || !doc?.content || !synced || hydrated.current) return
+
     if (editor.isEmpty) {
       editor.commands.setContent(doc.content)
     }
-  }, [editor, doc])
+    hydrated.current = true
+  }, [editor, doc, synced])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -81,25 +90,13 @@ export default function Editor() {
 
   return (
     <div className='min-h-screen bg-bg flex flex-col'>
-      {/* Top bar */}
       <header className='border-b border-border px-6 py-3 flex items-center justify-between gap-4'>
         <div className='flex items-center gap-3 flex-1'>
           <button
             onClick={() => navigate('/dashboard')}
             className='text-muted hover:text-text transition-colors cursor-pointer'
           >
-            <svg
-              width='16'
-              height='16'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <path d='M19 12H5M12 5l-7 7 7 7' />
-            </svg>
+            <LuArrowLeft size={15} />
           </button>
           <input
             value={title}
@@ -115,32 +112,18 @@ export default function Editor() {
             onClick={() => setShowShare(true)}
             className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent text-bg rounded-lg hover:bg-accent-dim transition-colors cursor-pointer'
           >
-            <svg
-              width='12'
-              height='12'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2.5'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <path d='M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13' />
-            </svg>
+            <RiShareBoxLine size={16} />
             Share
           </button>
         </div>
       </header>
 
-      {/* Toolbar */}
       <Toolbar editor={editor} />
 
-      {/* Editor */}
       <div className='flex-1 max-w-4xl w-full mx-auto'>
         <EditorContent editor={editor} />
       </div>
 
-      {/* Share modal */}
       {showShare && (
         <ShareModal docId={id!} onClose={() => setShowShare(false)} />
       )}

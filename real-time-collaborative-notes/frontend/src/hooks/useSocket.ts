@@ -1,17 +1,53 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import * as Y from 'yjs'
 import socket from '../lib/socket'
 
-export const useSocket = (docId: string, ydoc: Y.Doc) => {
+export const useSocket = (
+  docId: string,
+  ydoc: Y.Doc,
+  user: { id: string; name: string; image?: string },
+) => {
+  const [synced, setSynced] = useState(false)
+
   useEffect(() => {
-    socket.connect()
-    socket.once('connect', () => {
+    setSynced(false)
+
+    const emitJoinAndAwareness = () => {
       socket.emit('join-document', docId)
-    })
+
+      const colors = [
+        '#f87171',
+        '#fb923c',
+        '#a78bfa',
+        '#34d399',
+        '#60a5fa',
+        '#f472b6',
+      ]
+      const color = colors[user.id.charCodeAt(0) % colors.length]
+
+      socket.emit(
+        'awareness',
+        docId,
+        JSON.stringify({
+          userId: user.id,
+          name: user.name,
+          color,
+          image: user.image,
+        }),
+      )
+    }
+
+    socket.connect()
+    socket.on('connect', emitJoinAndAwareness)
+
+    if (socket.connected) {
+      emitJoinAndAwareness()
+    }
 
     socket.on('sync', (base64: string) => {
       const update = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
       Y.applyUpdate(ydoc, update, 'remote')
+      setSynced(true)
     })
 
     socket.on('update', (base64: string) => {
@@ -31,10 +67,13 @@ export const useSocket = (docId: string, ydoc: Y.Doc) => {
     ydoc.on('update', handleUpdate)
 
     return () => {
+      socket.off('connect', emitJoinAndAwareness)
       socket.off('sync')
       socket.off('update')
       ydoc.off('update', handleUpdate)
       socket.disconnect()
     }
   }, [docId, ydoc])
+
+  return { synced }
 }
