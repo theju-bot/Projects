@@ -18,14 +18,14 @@ export default function Join() {
       return
     }
 
-    client
-      .get(`/invites/accept/${token}`)
-      .then((res) => {
+    ;(async () => {
+      try {
+        const res = await client.get(`/invites/accept/${token}`)
         navigate(`/doc/${res.data.documentId.toString()}`, { replace: true })
-      })
-      .catch(() => {
+      } catch {
         setError('This invite link is invalid or has expired.')
-      })
+      }
+    })()
   }, [])
 
   return (

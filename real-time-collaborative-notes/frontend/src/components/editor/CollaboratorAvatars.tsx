@@ -12,17 +12,17 @@ export default function CollaboratorAvatars() {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([])
 
   useEffect(() => {
-    socket.on('awareness', (data: string) => {
+    const handler = (data: string) => {
       try {
         const parsed = JSON.parse(data) as Collaborator[]
         setCollaborators(parsed)
-      } catch {
-        // ignore malformed data
-      }
-    })
+      } catch {}
+    }
+
+    socket.on('awareness', handler)
 
     return () => {
-      socket.off('awareness')
+      socket.off('awareness', handler) 
     }
   }, [])
 
@@ -30,7 +30,7 @@ export default function CollaboratorAvatars() {
 
   return (
     <div className='flex items-center -space-x-2'>
-      {collaborators.slice(0, 5).map((c) => (
+      {collaborators.map((c) => (
         <div
           key={c.userId}
           title={c.name}
@@ -48,11 +48,6 @@ export default function CollaboratorAvatars() {
           )}
         </div>
       ))}
-      {collaborators.length > 5 && (
-        <div className='w-7 h-7 rounded-full border-2 border-bg bg-surface flex items-center justify-center text-xs text-muted'>
-          +{collaborators.length - 5}
-        </div>
-      )}
     </div>
   )
 }

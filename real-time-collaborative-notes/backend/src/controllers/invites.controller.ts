@@ -35,12 +35,25 @@ const acceptInvite = async (req: Request, res: Response): Promise<void> => {
     return
   }
 
+  const doc = await Document.findById(invite.documentId)
+  if (!doc) {
+    res.status(404).json({ error: 'Document not found' })
+    return
+  }
+
+  if (doc.collaborators.length >= 3) {
+    res.status(403).json({ error: 'Collaborator limit reached' })
+    return
+  }
+
   await Document.findByIdAndUpdate(invite.documentId, {
     $addToSet: { collaborators: req.user.id },
   })
 
   invite.used = true
   await invite.save()
+
+  res.status(200).json({ documentId: invite.documentId })
 }
 
 export { generateInvite, acceptInvite }
