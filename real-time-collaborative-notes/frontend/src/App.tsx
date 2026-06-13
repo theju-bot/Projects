@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Auth from './pages/auth'
+import Join from './pages/join'
 import Dashboard from './pages/dashboard'
 import AuthGuard from './components/AuthGuard'
 import Editor from './pages/editor'
@@ -14,6 +15,7 @@ export default function App() {
           <Route path='/login' />
           <Route path='/register' />
         </Route>
+        <Route path='/join' element={<Join />} />
 
         <Route element={<AuthGuard />}>
           <Route path='/dashboard' element={<Dashboard />} />

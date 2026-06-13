@@ -115,7 +115,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <BiCodeBlock size={18} />
       </ToolbarButton>
 
-      <div className='w-px h-4 bg-app-border mx-1' />
+      <div className='w-px h-4 bg-border mx-1' />
 
       <ToolbarButton onClick={() => editor.chain().focus().undo().run()}>
         <TbArrowBack size={18} />

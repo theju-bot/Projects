@@ -7,20 +7,23 @@ export interface RTCNDocument extends MongoDocument {
   collaborators: string[]
 }
 
-const DocumentSchema = new Schema<RTCNDocument>({
-  title: {
-    type: String,
-    default: 'Untitled',
+const DocumentSchema = new Schema<RTCNDocument>(
+  {
+    title: {
+      type: String,
+      default: 'Untitled',
+    },
+    content: {
+      type: String,
+      default: '',
+    },
+    ownerId: {
+      type: String,
+      required: true,
+    },
+    collaborators: [{ type: String }],
   },
-  content: {
-    type: String,
-    default: '',
-  },
-  ownerId: {
-    type: String,
-    required: true,
-  },
-  collaborators: [{ type: String }],
-})
+  { timestamps: true },
+)
 
 export const Document = mongoose.model<RTCNDocument>('Document', DocumentSchema)

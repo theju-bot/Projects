@@ -21,6 +21,7 @@ export default function Editor() {
   const [title, setTitle] = useState('')
   const [showShare, setShowShare] = useState(false)
   const titleDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const contentDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const ydoc = useMemo(() => new Y.Doc(), [id])
 
@@ -39,13 +40,20 @@ export default function Editor() {
     },
     onUpdate: ({ editor }) => {
       if (!id) return
-      updateDocument({ id, data: { content: editor.getHTML() } })
+      if (contentDebounce.current) clearTimeout(contentDebounce.current)
+      contentDebounce.current = setTimeout(() => {
+        updateDocument({ id, data: { content: editor.getHTML() } })
+      }, 1000)
     },
   })
 
   useEffect(() => {
     if (doc) setTitle(doc.title)
-  }, [doc])
+    if (!editor || !doc?.content) return
+    if (editor.isEmpty) {
+      editor.commands.setContent(doc.content)
+    }
+  }, [editor, doc])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -58,7 +66,7 @@ export default function Editor() {
   if (isLoading) {
     return (
       <div className='min-h-screen bg-bg flex items-center justify-center'>
-        <p className='text-app-muted text-sm'>Loading document...</p>
+        <p className='text-muted text-sm'>Loading document...</p>
       </div>
     )
   }
@@ -66,7 +74,7 @@ export default function Editor() {
   if (!doc) {
     return (
       <div className='min-h-screen bg-bg flex items-center justify-center'>
-        <p className='text-app-muted text-sm'>Document not found.</p>
+        <p className='text-muted text-sm'>Document not found.</p>
       </div>
     )
   }
@@ -74,11 +82,11 @@ export default function Editor() {
   return (
     <div className='min-h-screen bg-bg flex flex-col'>
       {/* Top bar */}
-      <header className='border-b border-app-border px-6 py-3 flex items-center justify-between gap-4'>
+      <header className='border-b border-border px-6 py-3 flex items-center justify-between gap-4'>
         <div className='flex items-center gap-3 flex-1'>
           <button
             onClick={() => navigate('/dashboard')}
-            className='text-app-muted hover:text-app-text transition-colors cursor-pointer'
+            className='text-muted hover:text-text transition-colors cursor-pointer'
           >
             <svg
               width='16'
@@ -97,7 +105,7 @@ export default function Editor() {
             value={title}
             onChange={handleTitleChange}
             placeholder='Untitled'
-            className='bg-transparent text-app-text font-medium text-sm focus:outline-none w-full max-w-sm placeholder:text-app-muted'
+            className='bg-transparent text-text font-medium text-sm focus:outline-none w-full max-w-sm placeholder:text-muted'
           />
         </div>
 
@@ -105,7 +113,7 @@ export default function Editor() {
           <CollaboratorAvatars />
           <button
             onClick={() => setShowShare(true)}
-            className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-app-accent text-bg rounded-lg hover:bg-app-accent-dim transition-colors cursor-pointer'
+            className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent text-bg rounded-lg hover:bg-accent-dim transition-colors cursor-pointer'
           >
             <svg
               width='12'

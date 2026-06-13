@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import authClient from '../lib/authClient'
 import {
@@ -9,6 +9,7 @@ import {
 import type { RTCADocument } from '../types/types'
 import { LuPencilLine } from 'react-icons/lu'
 import { FaPlus } from 'react-icons/fa6'
+import { RiDeleteBin6Line } from 'react-icons/ri'
 
 type Tab = 'all' | 'owned' | 'shared'
 
@@ -17,8 +18,14 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { data: session } = authClient.useSession()
   const { data: docs, isLoading } = useDocuments()
-  const { mutate: createDocument, isPending: isCreating } = useCreateDocument()
+  const {
+    mutate: createDocument,
+    isPending: isCreating,
+    isError,
+    error,
+  } = useCreateDocument()
   const { mutate: deleteDocument } = useDeleteDocument()
+  const [showError, setShowError] = useState(false)
 
   const userId = session?.user.id
 
@@ -35,6 +42,14 @@ export default function Dashboard() {
   }
 
   const handleOpen = (id: string) => navigate(`/doc/${id}`)
+
+  useEffect(() => {
+    if (isError) {
+      setShowError(true)
+      const timer = setTimeout(() => setShowError(false), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [isError])
 
   return (
     <div className='min-h-screen bg-bg'>
@@ -82,6 +97,13 @@ export default function Dashboard() {
           </button>
         </div>
 
+        {showError && (
+          <p className='text-red-400 text-sm mb-4 text-right'>
+            {(error as { response?: { data?: { error?: string } } })?.response
+              ?.data?.error ?? 'Failed to create document.'}
+          </p>
+        )}
+
         <div className='flex gap-1 mb-6 border-b border-border'>
           {(['all', 'owned', 'shared'] as Tab[]).map((t) => (
             <button
@@ -108,7 +130,7 @@ export default function Dashboard() {
               <div
                 key={doc._id}
                 onClick={() => handleOpen(doc._id)}
-                className='bg-surface border border-border rounded-xl p-5 cursor-pointer hover:border-app-border-hover hover:bg-surface-hover transition-all group'
+                className='bg-surface border border-border rounded-xl p-5 cursor-pointer hover:border-border-hover hover:bg-surface-hover transition-all group'
               >
                 <div className='flex items-start justify-between gap-2'>
                   <h2 className='text-text font-medium text-sm truncate flex-1'>
@@ -122,21 +144,7 @@ export default function Dashboard() {
                       }}
                       className='opacity-0 group-hover:opacity-100 text-muted hover:text-red-400 transition-all cursor-pointer'
                     >
-                      <svg
-                        width='14'
-                        height='14'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      >
-                        <polyline points='3 6 5 6 21 6' />
-                        <path d='M19 6l-1 14H6L5 6' />
-                        <path d='M10 11v6M14 11v6' />
-                        <path d='M9 6V4h6v2' />
-                      </svg>
+                      <RiDeleteBin6Line size={15} />
                     </button>
                   )}
                 </div>
@@ -149,7 +157,7 @@ export default function Dashboard() {
                     })}
                   </p>
                   {doc.ownerId !== userId && (
-                    <span className='text-xs text-app-accent bg-accent/10 px-2 py-0.5 rounded-full'>
+                    <span className='text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full'>
                       Shared
                     </span>
                   )}

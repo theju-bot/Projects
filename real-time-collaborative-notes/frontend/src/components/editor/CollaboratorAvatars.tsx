@@ -49,7 +49,7 @@ export default function CollaboratorAvatars() {
         </div>
       ))}
       {collaborators.length > 5 && (
-        <div className='w-7 h-7 rounded-full border-2 border-bg bg-surface flex items-center justify-center text-xs text-app-muted'>
+        <div className='w-7 h-7 rounded-full border-2 border-bg bg-surface flex items-center justify-center text-xs text-muted'>
           +{collaborators.length - 5}
         </div>
       )}
