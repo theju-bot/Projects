@@ -1,4 +1,3 @@
-import { MongoGridFSChunkError } from 'mongodb'
 import mongoose, { type Document, Schema, Types } from 'mongoose'
 
 export interface RTCNInviteToken extends Document {

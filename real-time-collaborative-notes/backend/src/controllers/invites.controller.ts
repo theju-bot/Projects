@@ -13,7 +13,6 @@ const generateInvite = async (req: Request, res: Response): Promise<void> => {
     res.status(403).json({ error: 'Collaborator limit reached' })
     return
   }
-
   if (doc.ownerId !== req.user.id) {
     res.status(403).json({ error: 'Forbidden' })
     return
@@ -45,7 +44,6 @@ const acceptInvite = async (req: Request, res: Response): Promise<void> => {
     res.status(403).json({ error: 'Collaborator limit reached' })
     return
   }
-
   await Document.findByIdAndUpdate(invite.documentId, {
     $addToSet: { collaborators: req.user.id },
   })
