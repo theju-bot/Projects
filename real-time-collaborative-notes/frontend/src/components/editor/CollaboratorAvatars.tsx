@@ -1,38 +1,45 @@
 import { useEffect, useState } from 'react'
-import socket from '../../lib/socket'
+import { Awareness } from 'y-protocols/awareness'
 
-interface Collaborator {
-  userId: string
+interface CollaboratorState {
   name: string
   color: string
   image?: string
 }
 
-export default function CollaboratorAvatars() {
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([])
+export default function CollaboratorAvatars({
+  awareness,
+}: {
+  awareness: Awareness
+}) {
+  const [collaborators, setCollaborators] = useState<CollaboratorState[]>([])
 
   useEffect(() => {
-    const handler = (data: string) => {
-      try {
-        const parsed = JSON.parse(data) as Collaborator[]
-        setCollaborators(parsed)
-      } catch {}
+    const handler = () => {
+      const states: CollaboratorState[] = []
+      console.log('awareness changed', awareness.getStates())
+      awareness.getStates().forEach((state, clientID) => {
+        if (clientID === awareness.clientID) return 
+        if (state.user) states.push(state.user as CollaboratorState)
+      })
+      setCollaborators(states)
     }
 
-    socket.on('awareness', handler)
+    awareness.on('change', handler)
+    handler()
 
     return () => {
-      socket.off('awareness', handler) 
+      awareness.off('change', handler)
     }
-  }, [])
+  }, [awareness])
 
   if (collaborators.length === 0) return null
 
   return (
     <div className='flex items-center -space-x-2'>
-      {collaborators.map((c) => (
+      {collaborators.map((c, i) => (
         <div
-          key={c.userId}
+          key={i}
           title={c.name}
           className='w-7 h-7 rounded-full border-2 border-bg flex items-center justify-center text-xs font-medium text-white overflow-hidden'
           style={{ backgroundColor: c.color }}

@@ -5,6 +5,15 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+  resolve: { 
+    alias: { 
+      '@': path.resolve(__dirname, './src'),
+      'y-protocols/awareness': path.resolve(__dirname, 'node_modules/y-protocols/awareness.js')
+    },
+    dedupe: ['yjs', 'y-protocols', '@tiptap/extension-collaboration', '@tiptap/extension-collaboration-caret', '@tiptap/y-tiptap']
+  },
+  optimizeDeps: {
+    exclude: ['yjs', 'y-protocols', '@tiptap/extension-collaboration', '@tiptap/extension-collaboration-caret', '@tiptap/y-tiptap']
+  },
   plugins: [react(), tailwindcss()],
 })

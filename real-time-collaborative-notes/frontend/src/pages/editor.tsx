@@ -12,11 +12,13 @@ import CollaboratorAvatars from '../components/editor/CollaboratorAvatars'
 import ShareModal from '../components/editor/ShareModal'
 import { LuArrowLeft } from 'react-icons/lu'
 import { RiShareBoxLine } from 'react-icons/ri'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
+import { Awareness } from 'y-protocols/awareness'
 
 export default function Editor() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { data: session } = authClient.useSession()
+  const { data: session, isPending } = authClient.useSession()
   const { data: doc, isLoading } = useDocument(id!)
   const { mutate: updateDocument } = useUpdateDocument()
 
@@ -24,21 +26,28 @@ export default function Editor() {
   const [showShare, setShowShare] = useState(false)
   const titleDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const ydoc = useMemo(() => {
-    const doc = new Y.Doc()
-    return doc
-  }, [id])
-  
-  const { synced } = useSocket(id!, ydoc, {
-    id: session?.user.id ?? '',
-    name: session?.user.name ?? 'Anonymous',
-    image: session?.user.image ?? undefined,
-  })
+  const ydoc = useMemo(() => new Y.Doc(), [id])
+  const awareness = useMemo(() => new Awareness(ydoc), [ydoc])
+
+  useSocket(
+    id!,
+    ydoc,
+    {
+      id: session?.user.id ?? '',
+      name: session?.user.name ?? 'Anonymous',
+      image: session?.user.image ?? undefined,
+    },
+    !isPending && !!session?.user.id,
+    awareness,
+  )
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ undoRedo: false }),
       Collaboration.configure({ document: ydoc }),
+      CollaborationCaret.configure({
+        provider: { awareness },
+      }),
     ],
     editorProps: {
       attributes: {
@@ -99,7 +108,7 @@ export default function Editor() {
         </div>
 
         <div className='flex items-center gap-3'>
-          <CollaboratorAvatars />
+          <CollaboratorAvatars awareness={awareness} />
           <button
             onClick={() => setShowShare(true)}
             className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent text-bg rounded-lg hover:bg-accent-dim transition-colors cursor-pointer'
