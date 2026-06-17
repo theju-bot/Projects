@@ -12,6 +12,7 @@ import { FaPlus } from 'react-icons/fa6'
 import { RiDeleteBin6Line } from 'react-icons/ri'
 
 type Tab = 'all' | 'owned' | 'shared'
+const tabs: Tab[] = ['all', 'owned', 'shared']
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>('all')
@@ -105,7 +106,7 @@ export default function Dashboard() {
         )}
 
         <div className='flex gap-1 mb-6 border-b border-border'>
-          {(['all', 'owned', 'shared'] as Tab[]).map((t) => (
+          {tabs.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
