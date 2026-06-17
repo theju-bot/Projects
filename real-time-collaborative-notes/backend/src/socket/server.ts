@@ -45,13 +45,18 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
     let currentDocId: string | null = null
 
     socket.on('join-document', async (docId: string) => {
-      currentDocId = docId
-      socket.join(docId)
+      try {
+        currentDocId = docId
+        socket.join(docId)
 
-      const state = Y.encodeStateAsUpdate(await getDoc(docId))
-      socket.emit('sync', Buffer.from(state).toString('base64'))
+        const state = Y.encodeStateAsUpdate(await getDoc(docId))
+        socket.emit('sync', Buffer.from(state).toString('base64'))
 
-      console.log(`Socket ${socket.id} joined document ${docId}`)
+        console.log(`Socket ${socket.id} joined document ${docId}`)
+      } catch (e) {
+        console.error(`join-document failed for ${docId}:`, e)
+        socket.emit('join-error', 'Failed to join document')
+      }
     })
 
     socket.on('update', async (docId: string, update: string) => {

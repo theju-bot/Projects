@@ -36,10 +36,9 @@ export const useSocket = (
 
       socket.emit('join-document', docId, user.id)
 
-      awareness.setLocalStateField('user', {
-        name: user.name,
-        color: getColor(user.id),
-        image: user.image,
+      awareness.setLocalState({
+        ...(awareness.getLocalState() ?? {}),
+        user: { name: user.name, color: getColor(user.id), image: user.image },
       })
 
       const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
@@ -84,7 +83,6 @@ export const useSocket = (
         const base64 = btoa(String.fromCharCode(...update))
         socket.emit('awareness', docId, base64)
       } else if (origin === 'remote' && added.length > 0) {
-        // A new remote client joined. Broadcast our local state so they know we exist!
         const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
         const base64 = btoa(String.fromCharCode(...update))
         socket.emit('awareness', docId, base64)
@@ -101,9 +99,17 @@ export const useSocket = (
 
     if (socket.connected) emitJoinAndAwareness()
     else socket.connect()
-    console.log('local state after set', awareness.getStates())
+
+    const ping = setInterval(() => {
+      if (!socket.connected) return
+      const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
+      const base64 = btoa(String.fromCharCode(...update))
+      socket.emit('awareness', docId, base64)
+    }, 15000)
 
     return () => {
+      clearInterval(ping)
+      awareness.setLocalState(null)
       socket.off('connect', emitJoinAndAwareness)
       socket.off('sync', handleSync)
       socket.off('update', handleUpdate)
