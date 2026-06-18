@@ -3,7 +3,7 @@ import * as Y from 'yjs'
 import {
   Awareness,
   encodeAwarenessUpdate,
-  applyAwarenessUpdate,
+  applyAwarenessUpdate
 } from 'y-protocols/awareness'
 import socket from '../lib/socket'
 
@@ -42,27 +42,23 @@ export const useSocket = (
       })
 
       const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
-      const base64 = btoa(String.fromCharCode(...update))
-      socket.emit('awareness', docId, base64)
+      socket.emit('awareness', docId, update)
     }
 
-    const handleSync = (base64: string) => {
-      const update = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+    const handleSync = (data: ArrayBuffer) => {
+      const update = new Uint8Array(data)
       Y.applyUpdate(ydoc, update, 'remote')
       setSynced(true)
     }
 
-    const handleUpdate = (base64: string) => {
-      const update = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+    const handleUpdate = (data: ArrayBuffer) => {
+      const update = new Uint8Array(data)
       Y.applyUpdate(ydoc, update, 'remote')
     }
 
-    const handleAwareness = (base64: string) => {
-      const update = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
-      console.log('update bytes', update)
-      console.log('awareness clientID', awareness.clientID)
+    const handleAwareness = (data: ArrayBuffer) => {
+      const update = new Uint8Array(data)
       applyAwarenessUpdate(awareness, update, 'remote')
-      console.log('states after', awareness.getStates())
     }
 
     const handleJoinError = (msg: string) => {
@@ -71,21 +67,17 @@ export const useSocket = (
 
     const handleYjsUpdate = (update: Uint8Array, origin: unknown) => {
       if (origin === 'remote') return
-      let binary = ''
-      update.forEach((b) => (binary += String.fromCharCode(b)))
-      socket.emit('update', docId, btoa(binary))
+      socket.emit('update', docId, update)
     }
 
     const handleAwarenessUpdate = ({ added, updated, removed }: any, origin: any) => {
       if (origin === 'local') {
         const changedClients = added.concat(updated, removed)
         const update = encodeAwarenessUpdate(awareness, changedClients)
-        const base64 = btoa(String.fromCharCode(...update))
-        socket.emit('awareness', docId, base64)
+        socket.emit('awareness', docId, update)
       } else if (origin === 'remote' && added.length > 0) {
         const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
-        const base64 = btoa(String.fromCharCode(...update))
-        socket.emit('awareness', docId, base64)
+        socket.emit('awareness', docId, update)
       }
     }
 
@@ -103,8 +95,7 @@ export const useSocket = (
     const ping = setInterval(() => {
       if (!socket.connected) return
       const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
-      const base64 = btoa(String.fromCharCode(...update))
-      socket.emit('awareness', docId, base64)
+      socket.emit('awareness', docId, update)
     }, 15000)
 
     return () => {

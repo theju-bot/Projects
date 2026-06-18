@@ -50,7 +50,7 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
         socket.join(docId)
 
         const state = Y.encodeStateAsUpdate(await getDoc(docId))
-        socket.emit('sync', Buffer.from(state).toString('base64'))
+        socket.emit('sync', Buffer.from(state))
 
         console.log(`Socket ${socket.id} joined document ${docId}`)
       } catch (e) {
@@ -59,14 +59,13 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
       }
     })
 
-    socket.on('update', async (docId: string, update: string) => {
-      const binary = Buffer.from(update, 'base64')
-      Y.applyUpdate(await getDoc(docId), binary)
+    socket.on('update', async (docId: string, update: Buffer) => {
+      Y.applyUpdate(await getDoc(docId), update)
       socket.to(docId).emit('update', update)
     })
 
-    socket.on('awareness', (docId: string, base64: string) => {
-      socket.to(docId).emit('awareness', base64)
+    socket.on('awareness', (docId: string, data: Buffer) => {
+      socket.to(docId).emit('awareness', data)
     })
 
     socket.on('disconnect', () => {
