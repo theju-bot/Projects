@@ -3,9 +3,11 @@ import * as Y from 'yjs'
 import {
   Awareness,
   encodeAwarenessUpdate,
-  applyAwarenessUpdate
+  applyAwarenessUpdate,
 } from 'y-protocols/awareness'
 import socket from '../lib/socket'
+
+type AwarenessUpdate = { added: number[]; updated: number[]; removed: number[] }
 
 const COLORS = ['#f87171', '#a78bfa', '#34d399']
 
@@ -65,12 +67,15 @@ export const useSocket = (
       console.error('Join error:', msg)
     }
 
-    const handleYjsUpdate = (update: Uint8Array, origin: unknown) => {
+    const handleYjsUpdate = (update: Uint8Array, origin: any) => {
       if (origin === 'remote') return
       socket.emit('update', docId, update)
     }
 
-    const handleAwarenessUpdate = ({ added, updated, removed }: any, origin: any) => {
+    const handleAwarenessUpdate = (
+      { added, updated, removed }: AwarenessUpdate,
+      origin: any,
+    ) => {
       if (origin === 'local') {
         const changedClients = added.concat(updated, removed)
         const update = encodeAwarenessUpdate(awareness, changedClients)
