@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import client from '../../lib/axios'
+import { AiOutlineClose } from 'react-icons/ai'
 
 interface ShareModalProps {
   docId: string
@@ -10,6 +11,7 @@ export default function ShareModal({ docId, onClose }: ShareModalProps) {
   const [link, setLink] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const generateLink = async () => {
     setIsLoading(true)
@@ -17,8 +19,9 @@ export default function ShareModal({ docId, onClose }: ShareModalProps) {
       const res = await client.post(`/invites/${docId}`)
       const token = res.data.token as string
       setLink(`${import.meta.env.VITE_URL}/join?token=${token}`)
-    } catch {
-      // handle error
+    } catch (err) {
+      console.error('Failed to generate invite link:', err)
+      setError('Could not generate a link. Try again.')
     } finally {
       setIsLoading(false)
     }
@@ -33,38 +36,27 @@ export default function ShareModal({ docId, onClose }: ShareModalProps) {
 
   return (
     <div className='fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4'>
-      <div className='bg-surface border border-app-border rounded-xl p-6 w-full max-w-md'>
+      <div className='bg-surface border border-border rounded-xl p-6 w-full max-w-md'>
         <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-app-text font-medium'>Share Document</h2>
+          <h2 className='text-text font-medium'>Share Document</h2>
           <button
             onClick={onClose}
-            className='text-app-muted hover:text-app-text transition-colors cursor-pointer'
+            className='text-muted hover:text-text transition-colors cursor-pointer'
           >
-            <svg
-              width='16'
-              height='16'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <line x1='18' y1='6' x2='6' y2='18' />
-              <line x1='6' y1='6' x2='18' y2='18' />
-            </svg>
+            <AiOutlineClose size={15} />
           </button>
         </div>
 
-        <p className='text-app-muted text-sm mb-4'>
+        <p className='text-muted text-sm mb-4'>
           Generate a one-time invite link. It expires in 24 hours.
         </p>
+        {error && <p className='text-red-400 text-xs mb-2'>{error}</p>}
 
         {!link ? (
           <button
             onClick={generateLink}
             disabled={isLoading}
-            className='w-full py-2.5 bg-app-accent text-bg text-sm font-medium rounded-lg hover:bg-app-accent-dim transition-colors cursor-pointer disabled:opacity-50'
+            className='w-full py-2.5 bg-accent text-bg text-sm font-medium rounded-lg hover:bg-accent-dim transition-colors cursor-pointer disabled:opacity-50'
           >
             {isLoading ? 'Generating...' : 'Generate Invite Link'}
           </button>
@@ -73,11 +65,11 @@ export default function ShareModal({ docId, onClose }: ShareModalProps) {
             <input
               value={link}
               readOnly
-              className='flex-1 bg-bg border border-app-border rounded-lg px-3 py-2 text-xs text-app-muted focus:outline-none truncate'
+              className='flex-1 bg-bg border border-border rounded-lg px-3 py-2 text-xs text-muted focus:outline-none truncate'
             />
             <button
               onClick={copyLink}
-              className='px-3 py-2 bg-app-accent text-bg text-xs font-medium rounded-lg hover:bg-app-accent-dim transition-colors cursor-pointer whitespace-nowrap'
+              className='px-3 py-2 bg-accent text-bg text-xs font-medium rounded-lg hover:bg-accent-dim transition-colors cursor-pointer whitespace-nowrap'
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>

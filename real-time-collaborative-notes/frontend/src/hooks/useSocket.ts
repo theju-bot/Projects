@@ -26,16 +26,10 @@ export const useSocket = (
   const [synced, setSynced] = useState(false)
 
   useEffect(() => {
-    console.log('useSocket effect ran', { enabled, userId: user.id, docId })
-
     if (!enabled) return
-    console.log('socket connected?', socket.connected, 'user:', user.id)
-
     setSynced(false)
 
     const emitJoinAndAwareness = () => {
-      console.log('emitting join and awareness')
-
       socket.emit('join-document', docId, user.id)
 
       awareness.setLocalState({
@@ -44,7 +38,6 @@ export const useSocket = (
       })
 
       const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
-      socket.emit('awareness', docId, update)
     }
 
     const handleSync = (data: ArrayBuffer) => {

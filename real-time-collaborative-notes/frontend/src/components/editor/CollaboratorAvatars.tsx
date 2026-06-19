@@ -17,9 +17,8 @@ export default function CollaboratorAvatars({
   useEffect(() => {
     const handler = () => {
       const states: CollaboratorState[] = []
-      console.log('awareness changed', awareness.getStates())
       awareness.getStates().forEach((state, clientID) => {
-        if (clientID === awareness.clientID) return 
+        if (clientID === awareness.clientID) return
         if (state.user) states.push(state.user as CollaboratorState)
       })
       setCollaborators(states)
