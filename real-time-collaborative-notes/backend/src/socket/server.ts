@@ -62,7 +62,6 @@ const checkAccess = async (docId: string, userId: string): Promise<boolean> => {
 
 export const setupWebsocketServer = (httpServer: HttpServer) => {
   const io = new Server(httpServer, {
-    path: process.env.SOCKET_PATH || '/socket.io',
     cors: {
       origin: process.env.CLIENT_URL,
       credentials: true,
