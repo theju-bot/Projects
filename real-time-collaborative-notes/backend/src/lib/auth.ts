@@ -2,8 +2,11 @@ import { betterAuth } from 'better-auth'
 import { mongodbAdapter } from 'better-auth/adapters/mongodb'
 import { mongoClient } from '../config/dbConn.js'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 export const auth = betterAuth({
   database: mongodbAdapter(mongoClient.db()),
+  baseURL: process.env.SERVER_URL || 'http://localhost:3001',
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -19,4 +22,10 @@ export const auth = betterAuth({
     updateAge: 60 * 60,
   },
   trustedOrigins: [process.env.CLIENT_URL!],
+  advanced: {
+    defaultCookieAttributes: {
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+    },
+  },
 })
