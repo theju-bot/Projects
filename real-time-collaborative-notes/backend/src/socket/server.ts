@@ -1,5 +1,6 @@
 import { Document } from '../models/Document.model.js'
 import { debounce } from 'lodash-es'
+import { Types } from 'mongoose'
 import type { Server as HttpServer } from 'node:http'
 import { Server } from 'socket.io'
 import * as Y from 'yjs'
@@ -11,7 +12,7 @@ const saves = new Map<string, ReturnType<typeof debounce>>()
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 const MAX_UPDATE_SIZE = 1_048_576
-const RATE_LIMIT = { max: 100, window: 10_000 }
+const RATE_LIMIT = { max: 1300, window: 10_000 }
 
 const checkRateLimit = (id: string): boolean => {
   const now = Date.now()
@@ -21,15 +22,18 @@ const checkRateLimit = (id: string): boolean => {
     rateLimitMap.set(id, entry)
   }
   entry.count++
+  // console.log(`rate check for ${id}: count=${entry.count}/${RATE_LIMIT.max}`)
   return entry.count <= RATE_LIMIT.max
 }
 
 const getDoc = async (docId: string): Promise<Y.Doc> => {
   if (docs.has(docId)) return docs.get(docId)!
 
-  const ydoc = new Y.Doc()
   const saved = await Document.findById(docId)
-  if (saved?.content) {
+  if (!saved) throw new Error('Document not found')
+
+  const ydoc = new Y.Doc()
+  if (saved.content) {
     try {
       Y.applyUpdate(ydoc, saved.content)
     } catch {
@@ -64,24 +68,32 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
     },
   })
 
-  io.on('connection', async (socket) => {
+  io.use(async (socket, next) => {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(
-        socket.handshake.headers as Record<string, string | string[] | undefined>,
+        socket.handshake.headers as Record<
+          string,
+          string | string[] | undefined
+        >,
       ),
     })
 
-    if (!session) {
-      socket.disconnect(true)
-      return
-    }
+    if (!session) return next(new Error('Unauthorized'))
 
     socket.data.user = session.user
-    
+    next()
+  })
+
+  io.on('connection', (socket) => {
     let currentDocId: string | null = null
 
     socket.on('join-document', async (docId: string) => {
-      const hasAccess = await checkAccess(docId, session.user.id)
+      if (!Types.ObjectId.isValid(docId)) {
+        socket.emit('join-error', 'Invalid document ID')
+        return
+      }
+
+      const hasAccess = await checkAccess(docId, socket.data.user.id)
       if (!hasAccess) {
         socket.emit('join-error', 'Forbidden')
         return
@@ -90,9 +102,14 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
       currentDocId = docId
       socket.join(docId)
 
-      const state = Y.encodeStateAsUpdate(await getDoc(docId))
-      socket.emit('sync', Buffer.from(state))
-      console.log(`Socket ${socket.id} joined document ${docId}`)
+      try {
+        const state = Y.encodeStateAsUpdate(await getDoc(docId))
+        socket.emit('sync', Buffer.from(state))
+        console.log(`Socket ${socket.id} joined document ${docId}`)
+      } catch (e) {
+        console.error(`join-document failed for ${docId}:`, e)
+        socket.emit('join-error', 'Failed to join document')
+      }
     })
 
     socket.on('update', async (docId: string, update: Buffer) => {
@@ -106,13 +123,23 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
         return
       }
 
-      Y.applyUpdate(await getDoc(docId), update)
-      socket.to(docId).emit('update', update)
+      try {
+        Y.applyUpdate(await getDoc(docId), update)
+        socket.to(docId).emit('update', update)
+      } catch (e) {
+        console.error(`update failed for ${docId}:`, e)
+        socket.emit('join-error', 'Document no longer available')
+        socket.leave(docId)
+      }
     })
 
     socket.on('awareness', (docId: string, data: Buffer) => {
       if (!socket.rooms.has(docId)) return
       if (!checkRateLimit(socket.id)) {
+        socket.disconnect(true)
+        return
+      }
+      if (!data || data.byteLength > MAX_UPDATE_SIZE) {
         socket.disconnect(true)
         return
       }

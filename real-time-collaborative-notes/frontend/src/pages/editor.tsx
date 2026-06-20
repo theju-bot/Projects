@@ -44,7 +44,7 @@ export default function Editor() {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ undoRedo: false }),
-      Collaboration.configure({ document: ydoc }),
+      Collaboration.configure({ document: ydoc, yUndoOptions: {} }),
       CollaborationCaret.configure({
         provider: { awareness },
       }),
