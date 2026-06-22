@@ -49,8 +49,8 @@ const useUpdateDocument = () => {
       const res = await client.patch(`/documents/${id}`, data)
       return res.data as RTCADocument
     },
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: ['documents', id] })
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['documents', variables.id] })
     },
   })
 }

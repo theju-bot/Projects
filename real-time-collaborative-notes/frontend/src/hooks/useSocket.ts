@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Y from 'yjs'
 import {
   Awareness,
@@ -11,7 +11,7 @@ type AwarenessUpdate = { added: number[]; updated: number[]; removed: number[] }
 
 const COLORS = ['#f87171', '#a78bfa', '#34d399']
 
-const getColor = (id: string) =>
+export const getColor = (id: string) =>
   COLORS[
     Array.from(id).reduce((acc, c) => acc + c.charCodeAt(0), 0) % COLORS.length
   ]
@@ -24,40 +24,55 @@ export const useSocket = (
   awareness: Awareness,
 ) => {
   const [synced, setSynced] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const docIdRef = useRef(docId)
+  docIdRef.current = docId
 
   useEffect(() => {
     if (!enabled) return
     setSynced(false)
+    setError(null)
 
     const emitJoinAndAwareness = () => {
+      if (docIdRef.current !== docId) return
       socket.emit('join-document', docId, user.id)
 
       awareness.setLocalState({
         ...(awareness.getLocalState() ?? {}),
         user: { name: user.name, color: getColor(user.id), image: user.image },
       })
-
-      const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
     }
 
     const handleSync = (data: ArrayBuffer) => {
+      if (docIdRef.current !== docId) return
       const update = new Uint8Array(data)
-      Y.applyUpdate(ydoc, update, 'remote')
-      setSynced(true)
+      try {
+        Y.applyUpdate(ydoc, update, 'remote')
+        setSynced(true)
+      } catch {
+        console.error('Yjs sync failed')
+        setError('Document sync failed')
+      }
     }
 
     const handleUpdate = (data: ArrayBuffer) => {
+      if (docIdRef.current !== docId) return
       const update = new Uint8Array(data)
       Y.applyUpdate(ydoc, update, 'remote')
     }
 
     const handleAwareness = (data: ArrayBuffer) => {
+      if (docIdRef.current !== docId) return
       const update = new Uint8Array(data)
       applyAwarenessUpdate(awareness, update, 'remote')
     }
 
     const handleJoinError = (msg: string) => {
-      console.error('Join error:', msg)
+      setError(msg)
+    }
+
+    const handleConnectError = (err: Error) => {
+      setError(err.message)
     }
 
     const handleYjsUpdate = (update: Uint8Array, origin: any) => {
@@ -84,6 +99,7 @@ export const useSocket = (
     socket.on('update', handleUpdate)
     socket.on('awareness', handleAwareness)
     socket.on('join-error', handleJoinError)
+    socket.on('connect_error', handleConnectError)
     ydoc.on('update', handleYjsUpdate)
     awareness.on('update', handleAwarenessUpdate)
 
@@ -98,16 +114,18 @@ export const useSocket = (
 
     return () => {
       clearInterval(ping)
+      socket.emit('leave-document', docId)
       awareness.setLocalState(null)
       socket.off('connect', emitJoinAndAwareness)
       socket.off('sync', handleSync)
       socket.off('update', handleUpdate)
       socket.off('awareness', handleAwareness)
       socket.off('join-error', handleJoinError)
+      socket.off('connect_error', handleConnectError)
       ydoc.off('update', handleYjsUpdate)
       awareness.off('update', handleAwarenessUpdate)
     }
   }, [enabled, docId, ydoc, user.id, awareness])
 
-  return { synced, awareness }
+  return { synced, error, awareness }
 }

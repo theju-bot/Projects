@@ -147,6 +147,17 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
       socket.to(docId).emit('awareness', data)
     })
 
+    socket.on('leave-document', (docId: string) => {
+      socket.leave(docId)
+      const socketRoom = io.sockets.adapter.rooms.get(docId)
+      if (!socketRoom || socketRoom.size === 0) {
+        saves.get(docId)?.flush()
+        saves.delete(docId)
+        docs.delete(docId)
+        console.log(`Cleaned up doc ${docId} from memory`)
+      }
+    })
+
     socket.on('disconnect', () => {
       rateLimitMap.delete(socket.id)
       if (!currentDocId) return

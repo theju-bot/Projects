@@ -5,7 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import * as Y from 'yjs'
 import { useDocument, useUpdateDocument } from '../hooks/useDocuments'
-import { useSocket } from '../hooks/useSocket'
+import { useSocket, getColor } from '../hooks/useSocket'
 import authClient from '../lib/authClient'
 import Toolbar from '../components/editor/Toolbar'
 import CollaboratorAvatars from '../components/editor/CollaboratorAvatars'
@@ -29,7 +29,7 @@ export default function Editor() {
   const ydoc = useMemo(() => new Y.Doc(), [id])
   const awareness = useMemo(() => new Awareness(ydoc), [ydoc])
 
-  useSocket(
+  const { error: socketError } = useSocket(
     id!,
     ydoc,
     {
@@ -47,6 +47,7 @@ export default function Editor() {
       Collaboration.configure({ document: ydoc }),
       CollaborationCaret.configure({
         provider: { awareness },
+        user: { name: session?.user.name ?? 'Anonymous', color: getColor(session?.user.id ?? '') },
       }),
     ],
     editorProps: {
@@ -118,6 +119,12 @@ export default function Editor() {
           </button>
         </div>
       </header>
+
+      {socketError && (
+        <div className='px-6 py-2 bg-red-900/40 border-b border-red-800 text-red-300 text-xs text-center'>
+          Connection error: {socketError}
+        </div>
+      )}
 
       <Toolbar editor={editor} />
 
