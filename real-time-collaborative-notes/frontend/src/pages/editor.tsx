@@ -121,7 +121,7 @@ export default function Editor() {
 
       <Toolbar editor={editor} />
 
-      <div className='flex-1 max-w-4xl w-full mx-auto border border-border bg-surface'>
+      <div className='flex-1 max-w-4xl w-full mx-auto border border-border'>
         <EditorContent editor={editor} />
       </div>
 
