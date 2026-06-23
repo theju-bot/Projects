@@ -2,7 +2,7 @@
 
 > Real-time collaborative notes powered by CRDTs. Multiple users edit the same document simultaneously with conflict-free merging — no refresh needed, no conflicts, no lag.
 
-Built solo by [thesigan](https://www.theju.dev).
+Built solo by [Thesigan](https://www.theju.dev).
 
 ![Demo](https://noteflow.theju.dev/og.webp)
 
@@ -17,7 +17,7 @@ Built solo by [thesigan](https://www.theju.dev).
 - **Document management** — Dashboard with Owned / Shared / All filters. Create (max 3 per user) and delete documents you own.
 - **Invite system** — Generate one-time invite links (24h expiry). Max 3 collaborators per document.
 - **Debounced persistence** — Yjs document state saved to MongoDB 2 seconds after the last edit. In-memory Y.Doc cache with cleanup on last disconnect.
-- **Rate-limited WebSocket** — 100 messages/10s per socket, max 1 MB update size. Disconnect on violation.
+- **Rate-limited WebSocket** — 1300 messages/10s per socket, max 1 MB update size. Disconnect on violation.
 - **Dark theme** — Custom Tailwind CSS v4 theme with deep purple accent, custom scrollbar, and typography plugin for prose styling.
 
 ---
@@ -90,7 +90,7 @@ Built solo by [thesigan](https://www.theju.dev).
 | `leave-document` | client → server | Leave room (triggers cleanup if empty) |
 | `join-error` | server → client | Rejection on auth or access failure |
 
-Rate-limited to 100 messages/10s per socket. Max update size: 1 MB.
+Rate-limited to 1300 messages/10s per socket. Max update size: 1 MB.
 
 ---
 
@@ -188,13 +188,9 @@ cd frontend && npm run build
 
 ---
 
-## Screenshots & Demo
+## LIVE Site
 
 > **Live site:** [noteflow.theju.dev](https://noteflow.theju.dev)
->
-> **Screenshot placeholder:** Add a screenshot of the editor dashboard and collaborative editing view here.
->
-> **Demo video:** Coming soon.
 
 ---
 
