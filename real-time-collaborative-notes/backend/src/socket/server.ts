@@ -85,8 +85,6 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
   })
 
   io.on('connection', (socket) => {
-    let currentDocId: string | null = null
-
     socket.on('join-document', async (docId: string) => {
       if (!Types.ObjectId.isValid(docId)) {
         socket.emit('join-error', 'Invalid document ID')
@@ -99,7 +97,6 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
         return
       }
 
-      currentDocId = docId
       socket.join(docId)
 
       try {
@@ -160,14 +157,15 @@ export const setupWebsocketServer = (httpServer: HttpServer) => {
 
     socket.on('disconnect', () => {
       rateLimitMap.delete(socket.id)
-      if (!currentDocId) return
-      console.log(`Socket ${socket.id} left document ${currentDocId}`)
-      const socketRoom = io.sockets.adapter.rooms.get(currentDocId)
-      if (!socketRoom || socketRoom.size === 0) {
-        saves.get(currentDocId)?.flush()
-        saves.delete(currentDocId)
-        docs.delete(currentDocId)
-        console.log(`Cleaned up doc ${currentDocId} from memory`)
+      for (const room of socket.rooms) {
+        if (room === socket.id) continue
+        const socketRoom = io.sockets.adapter.rooms.get(room)
+        if (!socketRoom || socketRoom.size === 0) {
+          saves.get(room)?.flush()
+          saves.delete(room)
+          docs.delete(room)
+          console.log(`Cleaned up doc ${room} from memory`)
+        }
       }
     })
   })

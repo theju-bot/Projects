@@ -93,7 +93,7 @@ export const useSocket = (
     socket.on('update', handleUpdate)
     socket.on('awareness', handleAwareness)
     socket.on('join-error', handleJoinError)
-    socket.on('connect_error', handleConnectError)
+    socket.on('connect-error', handleConnectError)
     ydoc.on('update', handleYjsUpdate)
     awareness.on('update', handleAwarenessUpdate)
 
@@ -108,7 +108,7 @@ export const useSocket = (
       socket.off('update', handleUpdate)
       socket.off('awareness', handleAwareness)
       socket.off('join-error', handleJoinError)
-      socket.off('connect_error', handleConnectError)
+      socket.off('connect-error', handleConnectError)
       ydoc.off('update', handleYjsUpdate)
       awareness.off('update', handleAwarenessUpdate)
     }
