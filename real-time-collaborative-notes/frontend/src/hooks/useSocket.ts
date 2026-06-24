@@ -25,8 +25,6 @@ export const useSocket = (
 ) => {
   const [synced, setSynced] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const docIdRef = useRef(docId)
-  docIdRef.current = docId
 
   useEffect(() => {
     if (!enabled) return
@@ -34,7 +32,6 @@ export const useSocket = (
     setError(null)
 
     const emitJoinAndAwareness = () => {
-      if (docIdRef.current !== docId) return
       socket.emit('join-document', docId, user.id)
 
       awareness.setLocalState({
@@ -44,7 +41,6 @@ export const useSocket = (
     }
 
     const handleSync = (data: ArrayBuffer) => {
-      if (docIdRef.current !== docId) return
       const update = new Uint8Array(data)
       try {
         Y.applyUpdate(ydoc, update, 'remote')
@@ -56,13 +52,11 @@ export const useSocket = (
     }
 
     const handleUpdate = (data: ArrayBuffer) => {
-      if (docIdRef.current !== docId) return
       const update = new Uint8Array(data)
       Y.applyUpdate(ydoc, update, 'remote')
     }
 
     const handleAwareness = (data: ArrayBuffer) => {
-      if (docIdRef.current !== docId) return
       const update = new Uint8Array(data)
       applyAwarenessUpdate(awareness, update, 'remote')
     }
@@ -106,14 +100,7 @@ export const useSocket = (
     if (socket.connected) emitJoinAndAwareness()
     else socket.connect()
 
-    const ping = setInterval(() => {
-      if (!socket.connected) return
-      const update = encodeAwarenessUpdate(awareness, [awareness.clientID])
-      socket.emit('awareness', docId, update)
-    }, 15000)
-
     return () => {
-      clearInterval(ping)
       socket.emit('leave-document', docId)
       awareness.setLocalState(null)
       socket.off('connect', emitJoinAndAwareness)
