@@ -7,60 +7,44 @@ import type {
   UpdateJobInput,
   MoveJobInput,
 } from '@/types/job.types'
+import apiFetch from '@/lib/apiFetch'
 
 const JOBS_KEY = ['jobs']
 
 async function fetchJobs(): Promise<Job[]> {
-  const res = await fetch('/api/jobs')
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
+  return apiFetch('/api/jobs')
 }
 
 async function fetchJob(id: string): Promise<Job> {
-  const res = await fetch(`/api/jobs/${id}`)
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
+  return apiFetch(`/api/jobs/${id}`)
 }
 
 async function createJob(input: CreateJobInput): Promise<Job> {
-  const res = await fetch('/api/jobs', {
+  return apiFetch('/api/jobs', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
 }
 
 async function updateJob(id: string, input: UpdateJobInput): Promise<Job> {
-  const res = await fetch(`/api/jobs/${id}`, {
+  return apiFetch(`/api/jobs/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
 }
 
 async function moveJob(id: string, input: MoveJobInput): Promise<Job> {
-  const res = await fetch(`/api/jobs/${id}`, {
+  return apiFetch(`/api/jobs/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
 }
 
 async function deleteJob(id: string): Promise<void> {
-  const res = await fetch(`/api/jobs/${id}`, { method: 'DELETE' })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
+  await apiFetch(`/api/jobs/${id}`, { method: 'DELETE' })
 }
 
 export function useJobs() {

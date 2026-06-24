@@ -10,6 +10,7 @@ import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { toast } from 'sonner'
 
 import {
   useOpenRouterKey,
@@ -40,13 +41,21 @@ export function OpenRouterKeyForm() {
     try {
       await saveKey(data)
       reset()
-    } catch (error) {}
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to save API key',
+      )
+    }
   }
 
   async function handleRemove() {
     try {
       await removeKey()
-    } catch (error) {}
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to remove API key',
+      )
+    }
   }
 
   if (isLoadingKey) {

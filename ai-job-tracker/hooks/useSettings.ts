@@ -2,33 +2,27 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { logClientError } from '@/lib/logClient'
 import type { SaveApiKeyInput } from '@/types/user.types'
+import apiFetch from '@/lib/apiFetch'
 
 const SETTINGS_KEY = ['settings']
 
 async function isOpenRouterKey(): Promise<boolean> {
-  const res = await fetch('/api/user/settings')
-  if (!res.ok) throw new Error('Failed to fetch key status')
-  const data = await res.json()
-  return data.hasKey === true
+  const { hasKey } = await apiFetch<{ hasKey: boolean }>('/api/user/settings')
+  return hasKey
 }
 
 async function saveOpenRouterKey(input: SaveApiKeyInput) {
-  const res = await fetch('/api/user/settings', {
+  return apiFetch('/api/user/settings', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data
 }
 
 async function deleteOpenRouterKey(): Promise<void> {
-  const res = await fetch('/api/user/settings', { method: 'DELETE' })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
+  return apiFetch('/api/user/settings', { method: 'DELETE' })
 }
 
 export function useOpenRouterKey() {

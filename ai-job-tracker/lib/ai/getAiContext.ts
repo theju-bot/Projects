@@ -7,7 +7,7 @@ import { Job } from '@/models/Job.model'
 import type { IJob } from '@/models/Job.model'
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!
-export const DEFAULT_MODEL = 'operouter/free'
+export const DEFAULT_MODEL = 'openrouter/free'
 
 export async function getAiContext(userId: string) {
   const db = mongoClient.db()

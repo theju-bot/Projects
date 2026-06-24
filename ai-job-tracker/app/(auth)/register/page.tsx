@@ -61,7 +61,10 @@ export default function RegisterPage() {
 
   function handleGoogle() {
     startTransition(async () => {
-      await authClient.signIn.social({ provider: 'google' })
+      const { error } = await authClient.signIn.social({ provider: 'google' })
+      if (error) {
+        toast.error(error.message ?? 'Google sign in failed')
+      }
     })
   }
 

@@ -3,8 +3,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppSidebar } from '@/components/shared/AppSidebar'
 import { Navbar } from '@/components/shared/NavBar'
-import { AddJobModal } from '@/components/jobs/AddJobModal'
-import { EditJobModal } from '@/components/jobs/EditJobModal'
+import { JobModal } from '@/components/jobs/JobModal'
 import { AiOutputDialog } from '@/components/ai/AiOutputDialog'
 
 export const metadata: Metadata = {
@@ -29,8 +28,7 @@ export default function DashboardLayout({
           <main className='flex-1 overflow-auto p-6 min-w-0'>{children}</main>
         </SidebarInset>
       </SidebarProvider>
-      <AddJobModal />
-      <EditJobModal />
+      <JobModal />
       <AiOutputDialog />
     </TooltipProvider>
   )

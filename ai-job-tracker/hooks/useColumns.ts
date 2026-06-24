@@ -11,45 +11,35 @@ import type {
   CreateColumnInput,
   UpdateColumnInput,
 } from '@/types/column.types'
+import apiFetch from '@/lib/apiFetch'
 
 const COLUMNS_KEY = ['columns']
 
 async function fetchColumns(): Promise<Column[]> {
-  const res = await fetch('/api/columns')
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
+  return apiFetch('/api/columns')
 }
 
 async function createColumn(input: CreateColumnInput): Promise<Column> {
-  const res = await fetch('/api/columns', {
+  return apiFetch('/api/columns', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   })
-
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
 }
 
 async function updateColumn(
   id: string,
   input: UpdateColumnInput,
 ): Promise<Column> {
-  const res = await fetch(`/api/columns/${id}`, {
+  return apiFetch(`/api/columns/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
   })
-
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
 }
 
 async function instantUpdateColumns(
@@ -71,9 +61,7 @@ async function instantUpdateColumns(
 }
 
 async function deleteColumn(id: string): Promise<void> {
-  const res = await fetch(`/api/columns/${id}`, { method: 'DELETE' })
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
+  return apiFetch(`/api/columns/${id}`, { method: 'DELETE' })
 }
 
 export function useColumns() {

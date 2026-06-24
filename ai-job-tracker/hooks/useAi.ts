@@ -1,20 +1,17 @@
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { AiFeature } from '@/types/ai.types'
+import apiFetch from '@/lib/apiFetch'
 
 async function callAiFeature(
   feature: AiFeature,
   jobId: string,
 ): Promise<string> {
-  const res = await fetch(`/api/ai/${feature}`, {
+  return apiFetch(`/api/ai/${feature}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jobId, feature }),
+    body: JSON.stringify({ jobId }),
   })
-
-  const data = await res.json()
-  if (!data.success) throw new Error(data.message)
-  return data.data
 }
 
 export function useAiFeature(feature: AiFeature) {

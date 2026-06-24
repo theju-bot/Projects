@@ -27,7 +27,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const db = mongoClient.db()
   await db
     .collection('user')
-    .updateOne({ _id: new ObjectId(session.user.id) }, { $set: { openRouterKey: encrypted } })
+    .updateOne(
+      { _id: new ObjectId(session.user.id) },
+      { $set: { openRouterKey: encrypted } },
+    )
 
   return NextResponse.json({ success: true, message: 'API key saved' })
 })
@@ -50,13 +53,17 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const session = await requireSession(req)
 
   const db = mongoClient.db()
-  const user = await db.collection('user').findOne(
-    { _id: new ObjectId(session.user.id) },
-    { projection: { openRouterKey: 1  } }
-  )
+  const user = await db
+    .collection('user')
+    .findOne(
+      { _id: new ObjectId(session.user.id) },
+      { projection: { openRouterKey: 1 } },
+    )
 
   return NextResponse.json({
     success: true,
-    hasKey: !!user?.openRouterKey,
+    data: {
+      hasKey: !!user?.openRouterKey,
+    },
   })
 })
