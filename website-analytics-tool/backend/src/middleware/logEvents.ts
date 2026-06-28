@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import { v4 as uuid } from 'uuid'
-import fs from 'fs'
 import fsPromises from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -17,17 +16,8 @@ export const logEvents = async (message: string, logName: string): Promise<void>
     const logsDir = path.join(__dirname, '..', 'logs')
     const logFile = path.join(logsDir, logName)
 
-    if (!fs.existsSync(logsDir)) {
-      await fsPromises.mkdir(logsDir)
-    }
-
-    let existingLogs = ''
-
-    if (fs.existsSync(logFile)) {
-      existingLogs = await fsPromises.readFile(logFile, 'utf8')
-    }
-
-    await fsPromises.writeFile(logFile, logItem + existingLogs)
+    await fsPromises.mkdir(logsDir, { recursive: true })
+    await fsPromises.appendFile(logFile, logItem)
   } catch (err) {
     console.error(err)
   }

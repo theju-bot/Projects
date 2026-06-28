@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAppSelector } from './store/hooks'
-import { selectIsAuthenticated } from './store/slices/authSlice'
+import { useAppDispatch, useAppSelector } from './store/hooks'
+import { selectIsAuthenticated, setUser } from './store/slices/authSlice'
+import client from './api/client'
+import type { User } from './types/types'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Sites from './pages/Sites'
@@ -17,6 +20,15 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 const App = () => {
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    client
+      .get<{ user: User }>('/auth/refresh')
+      .then((res) => dispatch(setUser(res.data.user)))
+      .catch(() => {})
+  }, [dispatch])
+
   return (
     <Routes>
       <Route

@@ -86,7 +86,10 @@ const login = async (
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
-    res.status(200).json({ message: 'Logged in successfully' })
+    res.status(200).json({
+      message: 'Logged in successfully',
+      user: { _id: user._id, email: user.email },
+    })
   } catch (err) {
     next(err)
   }
@@ -110,8 +113,16 @@ const refresh = async (
       process.env.REFRESH_TOKEN_SECRET as string,
     ) as { userId: string }
 
+    const user = await User.findById(decoded.userId)
+      .select('-password')
+      .exec()
+    if (!user) {
+      res.status(401).json({ message: 'Unauthorized' })
+      return
+    }
+
     const accessToken = jwt.sign(
-      { userId: decoded.userId },
+      { userId: user._id },
       process.env.ACCESS_TOKEN_SECRET as string,
       { expiresIn: '15m', issuer: 'theju' },
     )
@@ -123,7 +134,10 @@ const refresh = async (
       maxAge: 15 * 60 * 1000,
     })
 
-    res.status(200).json({ message: 'Token refreshed' })
+    res.status(200).json({
+      message: 'Token refreshed',
+      user: { _id: user._id, email: user.email },
+    })
   } catch (err) {
     next(err)
   }
